@@ -7,7 +7,7 @@ data class Sounds(
     var title: String,
     var description: String,
     var filePath: String,
-    var imagePath: String = "default.png"
+    var imagePath: String = "default.svg"
 )
 
 val defaultSounds = listOf(
