@@ -11,6 +11,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.AudioMan"
+
         tools:targetApi="31">
         <activity
             android:name=".MainActivity"
@@ -23,6 +24,11 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <!-- This is for the MediaPlayer       -->
+        <service
+            android:name=".utils.AudioPlayer"
+            android:foregroundServiceType="mediaPlayback"
+            android:exported="false"/>
     </application>
 
 </manifest>

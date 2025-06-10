@@ -17,7 +17,6 @@ fun NavBar(navController: NavController, routes: List<Router>) {
     NavigationBar {
         routes.forEach { screen ->
             val isSelected = currentRoute == screen.route
-
             NavigationBarItem(
                 selected = isSelected,
                 onClick = {

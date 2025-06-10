@@ -1,7 +1,12 @@
 package com.sonnenstahl.audioman
 
+import android.content.Intent
 import android.util.Log
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -12,10 +17,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -24,7 +27,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat
+import androidx.media3.exoplayer.ExoPlayer
+import com.sonnenstahl.audioman.utils.AudioPlayer
 import com.sonnenstahl.audioman.utils.defaultSounds
 
 
@@ -35,7 +42,11 @@ import com.sonnenstahl.audioman.utils.defaultSounds
 @Composable
 fun Library() {
     val scrollState = rememberScrollState()
-    Box(modifier = Modifier.fillMaxSize()) {
+
+    val context = LocalContext.current
+
+    Box(
+        modifier = Modifier.fillMaxSize()) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -60,6 +71,9 @@ fun Library() {
                             shape = RoundedCornerShape(12.dp)
                         )
                         .padding(12.dp)
+                        .clickable {
+                            AudioPlayer.playAsset(context, sound)
+                        }
                 ) {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
@@ -83,7 +97,7 @@ fun Library() {
         }
 
         OutlinedButton(
-            onClick = { Log.i("button press","Butotn has been pressed") },
+            onClick = { Log.i("button press","Button has been pressed") },
             colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
             contentPadding = PaddingValues(0.dp),
             modifier = Modifier
@@ -91,8 +105,9 @@ fun Library() {
                 .padding(16.dp)
                 .size(56.dp),
         ) {
+            val filepath = if (isSystemInDarkTheme()) "dark-add.svg" else "add.svg"
             SvgImageFromAssets(
-                filepath = "add.svg",
+                filepath = filepath,
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(12.dp)
