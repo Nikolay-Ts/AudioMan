@@ -24,6 +24,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -42,8 +44,8 @@ import com.sonnenstahl.audioman.utils.defaultSounds
 @Composable
 fun Library() {
     val scrollState = rememberScrollState()
-
     val context = LocalContext.current
+    val popUpDialog = remember { mutableStateOf(false) }
 
     Box(
         modifier = Modifier.fillMaxSize()) {
@@ -55,6 +57,8 @@ fun Library() {
             verticalArrangement = Arrangement.spacedBy(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            AddNoise(popUpDialog.value) { popUpDialog.value = false }
+
             Text(
                 text = "Sound Library",
                 style = MaterialTheme.typography.titleLarge,
@@ -97,7 +101,7 @@ fun Library() {
         }
 
         OutlinedButton(
-            onClick = { Log.i("button press","Button has been pressed") },
+            onClick = { popUpDialog.value = true },
             colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
             contentPadding = PaddingValues(0.dp),
             modifier = Modifier

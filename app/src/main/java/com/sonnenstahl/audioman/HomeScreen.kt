@@ -21,7 +21,7 @@ import androidx.compose.ui.unit.dp
 import androidx.media3.common.util.Log
 import androidx.media3.common.util.UnstableApi
 import androidx.navigation.NavController
-import com.sonnenstahl.audioman.utils.AnimatedPause
+import com.sonnenstahl.audioman.AnimatedPause
 import com.sonnenstahl.audioman.utils.AudioPlayer
 import com.sonnenstahl.audioman.utils.fallBackSound
 
