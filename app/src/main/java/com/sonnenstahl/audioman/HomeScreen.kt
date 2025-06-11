@@ -21,6 +21,7 @@ import androidx.compose.ui.unit.dp
 import androidx.media3.common.util.Log
 import androidx.media3.common.util.UnstableApi
 import androidx.navigation.NavController
+import com.sonnenstahl.audioman.utils.AnimatedPause
 import com.sonnenstahl.audioman.utils.AudioPlayer
 import com.sonnenstahl.audioman.utils.fallBackSound
 
@@ -58,19 +59,17 @@ fun HomeScreen(navController: NavController) {
             Text(currentlyPLaying.description)
         }
 
-        Row {
-            OutlinedButton(onClick = {
-                AudioPlayer.pause()
-                isPlaying.value = false
-            }) {
-                Text("Pause")
-            }
+        AnimatedPause(isPlaying.value) {
 
-            OutlinedButton(onClick = {
-                AudioPlayer.play()
-                isPlaying.value = true
-            }) {
-                Text("Play")
+            when (isPlaying.value) {
+                true ->  {
+                    AudioPlayer.pause()
+                    isPlaying.value = false
+                }
+                false -> {
+                    AudioPlayer.play()
+                    isPlaying.value = true
+                }
             }
         }
     }

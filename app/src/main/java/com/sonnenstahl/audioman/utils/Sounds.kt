@@ -13,7 +13,7 @@ data class Sounds(
 val fallBackSound = Sounds("Nothing", "Nothing is player", "")
 
 val defaultSounds = listOf(
-    Sounds("Coffee Shop" , "people talking in a coffee shop" , "Rain_sounds2.m4a"),
+    Sounds("Coffee Shop" , "people talking in a coffee shop" , "coffee_shop.m4a"),
     Sounds("Rain"        , "rain outside of your window"     , "rain.m4a"),
     Sounds("Forest"      , "wild forest"                     , "forest.m4a"),
     Sounds("Campfire"    , "sitting by the campfire"         , "fire.m4a"),
