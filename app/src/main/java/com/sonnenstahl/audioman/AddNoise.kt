@@ -24,14 +24,35 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.ui.platform.LocalContext
+import coil.compose.rememberAsyncImagePainter
+import com.sonnenstahl.audioman.utils.Sounds
+import com.sonnenstahl.audioman.utils.saveUri
 
 // TODO: Add the other fields, and make a picker for images and files
 // TODO: Validation function and highlight in red what is not good
 @Composable
 fun AddNoise(showDialog: Boolean, onDismiss: () -> Unit) {
+    val context = LocalContext.current
+
     val title = remember { mutableStateOf("") }
     val description = remember { mutableStateOf("") }
-    // TODO: Images and the audioPath itself
+    val audioUri = remember { mutableStateOf<Uri?>(null) }
+    val audioPickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri ->
+        audioUri.value = uri
+    }
+    val imageUri = remember { mutableStateOf<Uri?>(null) }
+
+    val imagePickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+        imageUri.value = uri
+    }
 
     if (showDialog) {
         Dialog(onDismissRequest = onDismiss) {
@@ -59,37 +80,58 @@ fun AddNoise(showDialog: Boolean, onDismiss: () -> Unit) {
                         placeholder = { Text("Title of you own Noise") }
                     )
                     TextField(
-                        value=title.value,
-                        onValueChange = { title.value = it },
+                        value=description.value,
+                        onValueChange = { description.value = it },
                         modifier = Modifier
                             .padding(all = 16.dp)
                             .fillMaxWidth(),
                         enabled = true,
-                        label = { Text("Title") },
-                        placeholder = { Text("Title of you own Noise") }
+                        label = { Text("Description") },
+                        placeholder = { Text("What makes your Noise special") }
                     )
 
-                    TextField(
-                        value=title.value,
-                        onValueChange = { title.value = it },
+                    OutlinedButton(
+                        onClick = { audioPickerLauncher.launch("audio/*") },
                         modifier = Modifier
-                            .padding(all = 16.dp)
-                            .fillMaxWidth(),
-                        enabled = true,
-                        label = { Text("Title") },
-                        placeholder = { Text("Title of you own Noise") }
-                    )
+                            .padding(horizontal = 16.dp)
+                            .fillMaxWidth()
+                    ) {
+                        Text(if (audioUri.value != null)
+                            "Selected: ${audioUri.value?.lastPathSegment}"
+                        else
+                            "Pick Audio File")
+                    }
 
-                    TextField(
-                        value=title.value,
-                        onValueChange = { title.value = it },
+                    OutlinedButton(
+                        onClick = { imagePickerLauncher.launch("image/*") },
                         modifier = Modifier
-                            .padding(all = 16.dp)
-                            .fillMaxWidth(),
-                        enabled = true,
-                        label = { Text("Title") },
-                        placeholder = { Text("Title of you own Noise") }
-                    )
+                            .padding(horizontal = 16.dp)
+                            .fillMaxWidth()
+                    ) {
+                        Text(if (imageUri.value != null)
+                            "Selected Image: ${imageUri.value?.lastPathSegment}"
+                        else
+                            "Pick Image")
+                    }
+
+                    imageUri.value?.let { uri ->
+                        Button(
+                            colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
+                            onClick = {
+                                imageUri.value = null
+                                return@Button
+                            }
+                        ) {
+                            androidx.compose.foundation.Image(
+                                painter = rememberAsyncImagePainter(uri),
+                                contentDescription = "Selected Image",
+                                modifier = Modifier
+                                    .padding(16.dp)
+                                    .height(100.dp)
+                                    .fillMaxWidth()
+                            )
+                        }
+                    }
 
                     Row(
                         modifier = Modifier
@@ -117,7 +159,27 @@ fun AddNoise(showDialog: Boolean, onDismiss: () -> Unit) {
                             colors= ButtonDefaults.buttonColors(
                                 containerColor = Color(0xFF4CAF50)
                             ),
-                            onClick = onDismiss
+                            onClick = {
+
+                                val storedAudioPath = audioUri.value?.let {
+                                    saveUri(context, it, "audio_${System.currentTimeMillis()}")
+                                }
+
+                                val storedImagePath = imageUri.value?.let {
+                                    saveUri(context, it, "image_${System.currentTimeMillis()}")
+                                }
+
+                                val newSound = Sounds(
+                                    title.value,
+                                    description.value,
+                                    storedAudioPath ?: "default.m4a",
+                                    storedImagePath ?: "default.svg"
+                                )
+
+
+
+                                onDismiss
+                            }
                         ) {
                             Box(
                                 modifier = commonModifer,
