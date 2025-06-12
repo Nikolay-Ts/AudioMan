@@ -1,5 +1,6 @@
 package com.sonnenstahl.audioman
 
+import android.content.Context
 import android.content.Intent
 import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -24,6 +25,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -34,7 +36,10 @@ import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.media3.exoplayer.ExoPlayer
 import com.sonnenstahl.audioman.utils.AudioPlayer
+import com.sonnenstahl.audioman.utils.SOUNDS_FILE_PATH
+import com.sonnenstahl.audioman.utils.Sounds
 import com.sonnenstahl.audioman.utils.defaultSounds
+import com.sonnenstahl.audioman.utils.loadSounds
 
 
 /**
@@ -46,6 +51,12 @@ fun Library() {
     val scrollState = rememberScrollState()
     val context = LocalContext.current
     val popUpDialog = remember { mutableStateOf(false) }
+    val customSounds = remember { mutableStateOf(emptyList<Sounds>()) }
+
+    LaunchedEffect(Unit) {
+        customSounds.value = loadSounds(context, SOUNDS_FILE_PATH)
+        Log.d("TESTIN", "Hello $customSounds")
+    }
 
     Box(
         modifier = Modifier.fillMaxSize()) {
@@ -57,7 +68,7 @@ fun Library() {
             verticalArrangement = Arrangement.spacedBy(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            AddNoise(popUpDialog.value) { popUpDialog.value = false }
+            AddNoise(popUpDialog.value, customSounds) { popUpDialog.value = false }
 
             Text(
                 text = "Sound Library",
@@ -65,39 +76,9 @@ fun Library() {
                 modifier = Modifier.padding(bottom = 8.dp)
             )
 
-            defaultSounds.forEach { sound ->
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth(0.95f)
-                        .border(
-                            width = 1.dp,
-                            color = Color.LightGray,
-                            shape = RoundedCornerShape(12.dp)
-                        )
-                        .padding(12.dp)
-                        .clickable {
-                            AudioPlayer.playAsset(context, sound)
-                        }
-                ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(12.dp)
-                    ) {
-                        SvgImageFromAssets(
-                            sound.imagePath,
-                            modifier = Modifier.size(40.dp)
-                        )
+            ShowSounds(defaultSounds, context)
 
-                        Column {
-                            Text(text = sound.title, style = MaterialTheme.typography.titleMedium)
-                            Text(
-                                text = sound.description,
-                                style = MaterialTheme.typography.bodySmall
-                            )
-                        }
-                    }
-                }
-            }
+            ShowSounds(customSounds.value, context)
         }
 
         OutlinedButton(
@@ -116,6 +97,43 @@ fun Library() {
                     .fillMaxSize()
                     .padding(12.dp)
             )
+        }
+    }
+}
+
+@Composable
+fun ShowSounds(sounds: List<Sounds>, context: Context) {
+    sounds.forEach { sound ->
+        Box(
+            modifier = Modifier
+                .fillMaxWidth(0.95f)
+                .border(
+                    width = 1.dp,
+                    color = Color.LightGray,
+                    shape = RoundedCornerShape(12.dp)
+                )
+                .padding(12.dp)
+                .clickable {
+                    AudioPlayer.playAsset(context, sound)
+                }
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                SvgImageFromAssets(
+                    sound.imagePath,
+                    modifier = Modifier.size(40.dp)
+                )
+
+                Column {
+                    Text(text = sound.title, style = MaterialTheme.typography.titleMedium)
+                    Text(
+                        text = sound.description,
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                }
+            }
         }
     }
 }

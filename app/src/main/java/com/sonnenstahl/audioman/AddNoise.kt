@@ -27,16 +27,27 @@ import androidx.compose.ui.window.Dialog
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.runtime.MutableState
 import androidx.compose.ui.platform.LocalContext
 import coil.compose.rememberAsyncImagePainter
+import com.sonnenstahl.audioman.utils.SOUNDS_FILE_PATH
 import com.sonnenstahl.audioman.utils.Sounds
+import com.sonnenstahl.audioman.utils.defaultSounds
+import com.sonnenstahl.audioman.utils.fallBackSound
+import com.sonnenstahl.audioman.utils.loadSounds
+import com.sonnenstahl.audioman.utils.saveSounds
 import com.sonnenstahl.audioman.utils.saveUri
 
 // TODO: Add the other fields, and make a picker for images and files
 // TODO: Validation function and highlight in red what is not good
 @Composable
-fun AddNoise(showDialog: Boolean, onDismiss: () -> Unit) {
+fun AddNoise(
+    showDialog: Boolean,
+    soundsList: MutableState<List<Sounds>>,
+    onDismiss: () -> Unit,
+) {
     val context = LocalContext.current
+    val newSound = remember { mutableStateOf(fallBackSound) }
 
     val title = remember { mutableStateOf("") }
     val description = remember { mutableStateOf("") }
@@ -160,7 +171,6 @@ fun AddNoise(showDialog: Boolean, onDismiss: () -> Unit) {
                                 containerColor = Color(0xFF4CAF50)
                             ),
                             onClick = {
-
                                 val storedAudioPath = audioUri.value?.let {
                                     saveUri(context, it, "audio_${System.currentTimeMillis()}")
                                 }
@@ -169,16 +179,17 @@ fun AddNoise(showDialog: Boolean, onDismiss: () -> Unit) {
                                     saveUri(context, it, "image_${System.currentTimeMillis()}")
                                 }
 
-                                val newSound = Sounds(
+                                newSound.value = Sounds(
                                     title.value,
                                     description.value,
                                     storedAudioPath ?: "default.m4a",
                                     storedImagePath ?: "default.svg"
                                 )
+                                soundsList.value.plus(newSound.value)
 
+                                saveSounds(context, soundsList.value, SOUNDS_FILE_PATH)
 
-
-                                onDismiss
+                                onDismiss()
                             }
                         ) {
                             Box(
