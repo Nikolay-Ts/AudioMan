@@ -25,16 +25,15 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import android.net.Uri
+import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.platform.LocalContext
 import coil.compose.rememberAsyncImagePainter
 import com.sonnenstahl.audioman.utils.SOUNDS_FILE_PATH
 import com.sonnenstahl.audioman.utils.Sounds
-import com.sonnenstahl.audioman.utils.defaultSounds
 import com.sonnenstahl.audioman.utils.fallBackSound
-import com.sonnenstahl.audioman.utils.loadSounds
 import com.sonnenstahl.audioman.utils.saveSounds
 import com.sonnenstahl.audioman.utils.saveUri
 
@@ -43,7 +42,7 @@ import com.sonnenstahl.audioman.utils.saveUri
 @Composable
 fun AddNoise(
     showDialog: Boolean,
-    soundsList: MutableState<List<Sounds>>,
+    soundsList: SnapshotStateList<Sounds>,
     onDismiss: () -> Unit,
 ) {
     val context = LocalContext.current
@@ -185,9 +184,11 @@ fun AddNoise(
                                     storedAudioPath ?: "default.m4a",
                                     storedImagePath ?: "default.svg"
                                 )
-                                soundsList.value.plus(newSound.value)
 
-                                saveSounds(context, soundsList.value, SOUNDS_FILE_PATH)
+                                soundsList.add(newSound.value)
+
+                                Log.d("MEOW", "${soundsList}\n ${newSound.value}")
+                                saveSounds(context, soundsList, SOUNDS_FILE_PATH)
 
                                 onDismiss()
                             }

@@ -4,6 +4,8 @@ import android.content.Context
 import android.net.Uri
 import android.util.Log
 import android.webkit.MimeTypeMap
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateListOf
 import kotlinx.serialization.json.Json
 import java.io.File
 import java.io.FileOutputStream
@@ -57,12 +59,27 @@ fun saveSounds(
     }
 }
 
-fun loadSounds(context: Context, filepath: String): List<Sounds> {
+fun loadSounds(context: Context, filepath: String): MutableList<Sounds> {
     val file = File(context.filesDir, filepath)
     return try {
         val jsonString = file.readText()
-        Json.decodeFromString(jsonString)
+//        Json.decodeFromString<List<Sounds>>(jsonString).toMutableList()
+        val decodedList = Json.decodeFromString<List<Sounds>>(jsonString)
+        mutableStateListOf(*decodedList.toTypedArray())
+
     } catch (e: FileNotFoundException) {
-        emptyList<Sounds>()
+        mutableStateListOf<Sounds>()
+    }
+}
+
+fun deleteSoundsFile(context: Context, filepath: String = SOUNDS_FILE_PATH): Boolean {
+    val file = File(context.filesDir, filepath)
+    return if (file.exists()) {
+        file.delete().also {
+            Log.d("FILE_DELETE", "Deleted $filepath: $it")
+        }
+    } else {
+        Log.d("FILE_DELETE", "$filepath does not exist.")
+        false
     }
 }

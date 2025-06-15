@@ -23,7 +23,7 @@ object AudioPlayer {
 
     fun playAsset(context: Context, sound: Sounds) {
         initialize(context)
-        val assetUri = "asset:///${sound.audiPath}" // for use with AssetDataSource
+        val assetUri = "asset:///${sound.audioPath}" // for use with AssetDataSource
 
         val mediaItem = MediaItem.fromUri(assetUri)
         exoPlayer?.apply {

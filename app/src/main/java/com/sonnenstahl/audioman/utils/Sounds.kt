@@ -6,7 +6,7 @@ import kotlinx.serialization.Serializable
 data class Sounds(
     var title: String,
     var description: String,
-    var audiPath: String,
+    var audioPath: String,
     var imagePath: String = "default.svg"
 )
 

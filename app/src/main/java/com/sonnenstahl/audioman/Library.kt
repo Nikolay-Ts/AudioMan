@@ -1,10 +1,8 @@
 package com.sonnenstahl.audioman
 
 import android.content.Context
-import android.content.Intent
 import android.util.Log
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -26,6 +24,7 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -33,13 +32,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import androidx.core.content.ContextCompat
-import androidx.media3.exoplayer.ExoPlayer
+import coil.compose.rememberAsyncImagePainter
 import com.sonnenstahl.audioman.utils.AudioPlayer
 import com.sonnenstahl.audioman.utils.SOUNDS_FILE_PATH
 import com.sonnenstahl.audioman.utils.Sounds
 import com.sonnenstahl.audioman.utils.defaultSounds
+import com.sonnenstahl.audioman.utils.deleteSoundsFile
 import com.sonnenstahl.audioman.utils.loadSounds
+import java.io.File
 
 
 /**
@@ -51,11 +51,14 @@ fun Library() {
     val scrollState = rememberScrollState()
     val context = LocalContext.current
     val popUpDialog = remember { mutableStateOf(false) }
-    val customSounds = remember { mutableStateOf(emptyList<Sounds>()) }
+    val customSounds = remember { mutableStateListOf<Sounds>()}
+
 
     LaunchedEffect(Unit) {
-        customSounds.value = loadSounds(context, SOUNDS_FILE_PATH)
-        Log.d("TESTIN", "Hello $customSounds")
+        val loaded = loadSounds(context, SOUNDS_FILE_PATH)
+        customSounds.clear()
+        customSounds.addAll(loaded)
+        Log.d("TESTIN", "Hello $loaded")
     }
 
     Box(
@@ -78,7 +81,7 @@ fun Library() {
 
             ShowSounds(defaultSounds, context)
 
-            ShowSounds(customSounds.value, context)
+            ShowSounds(customSounds, context)
         }
 
         OutlinedButton(
@@ -121,10 +124,20 @@ fun ShowSounds(sounds: List<Sounds>, context: Context) {
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                SvgImageFromAssets(
-                    sound.imagePath,
-                    modifier = Modifier.size(40.dp)
-                )
+                val isSvg = sound.imagePath.endsWith(".svg", ignoreCase = true)
+
+                if (isSvg) {
+                    SvgImageFromAssets(
+                        sound.imagePath,
+                        modifier = Modifier.size(40.dp)
+                    )
+                } else {
+                    Image(
+                        painter = rememberAsyncImagePainter(File(sound.imagePath)),
+                        contentDescription = null,
+                        modifier = Modifier.size(40.dp)
+                    )
+                }
 
                 Column {
                     Text(text = sound.title, style = MaterialTheme.typography.titleMedium)
