@@ -4,7 +4,6 @@ import android.content.Context
 import android.net.Uri
 import android.util.Log
 import android.webkit.MimeTypeMap
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateListOf
 import kotlinx.serialization.json.Json
 import java.io.File
@@ -47,7 +46,7 @@ fun saveUri(
 
 fun saveSounds(
     context: Context,
-    sounds: List<Sounds>,
+    sounds: List<Noise>,
     filepath: String
 ) {
     try {
@@ -59,16 +58,14 @@ fun saveSounds(
     }
 }
 
-fun loadSounds(context: Context, filepath: String): MutableList<Sounds> {
+fun loadSounds(context: Context, filepath: String): MutableList<Noise> {
     val file = File(context.filesDir, filepath)
     return try {
         val jsonString = file.readText()
-//        Json.decodeFromString<List<Sounds>>(jsonString).toMutableList()
-        val decodedList = Json.decodeFromString<List<Sounds>>(jsonString)
-        mutableStateListOf(*decodedList.toTypedArray())
+        Json.decodeFromString<List<Noise>>(jsonString).toMutableList()
 
     } catch (e: FileNotFoundException) {
-        mutableStateListOf<Sounds>()
+        mutableStateListOf<Noise>()
     }
 }
 

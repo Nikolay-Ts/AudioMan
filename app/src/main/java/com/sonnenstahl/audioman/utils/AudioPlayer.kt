@@ -13,7 +13,7 @@ import androidx.media3.common.Player
  */
 object AudioPlayer {
     private var exoPlayer: ExoPlayer? = null
-    private var sound: Sounds? = null
+    private var sound: Noise? = null
 
     fun initialize(context: Context) {
         if (exoPlayer == null) {
@@ -21,20 +21,24 @@ object AudioPlayer {
         }
     }
 
-    fun playAsset(context: Context, sound: Sounds) {
+    fun playAsset(context: Context, sound: Noise) {
         initialize(context)
-        val assetUri = "asset:///${sound.audioPath}" // for use with AssetDataSource
+        val mediaItem = if (sound.audioPath.startsWith("audio_") || sound.audioPath.endsWith(".m4a")) {
+            val assetUri = "asset:///${sound.audioPath}"
+            MediaItem.fromUri(assetUri)
+        } else {
+            MediaItem.fromUri(sound.audioPath)
+        }
 
-        val mediaItem = MediaItem.fromUri(assetUri)
         exoPlayer?.apply {
             setMediaItem(mediaItem)
             repeatMode = Player.REPEAT_MODE_ONE
             prepare()
             play()
         }
+
         this.sound = sound
     }
-
     fun getSound() = sound ?: fallBackSound
     fun pause() = exoPlayer?.pause()
     fun play() = exoPlayer?.play()

@@ -35,9 +35,8 @@ import androidx.compose.ui.unit.dp
 import coil.compose.rememberAsyncImagePainter
 import com.sonnenstahl.audioman.utils.AudioPlayer
 import com.sonnenstahl.audioman.utils.SOUNDS_FILE_PATH
-import com.sonnenstahl.audioman.utils.Sounds
+import com.sonnenstahl.audioman.utils.Noise
 import com.sonnenstahl.audioman.utils.defaultSounds
-import com.sonnenstahl.audioman.utils.deleteSoundsFile
 import com.sonnenstahl.audioman.utils.loadSounds
 import java.io.File
 
@@ -51,14 +50,13 @@ fun Library() {
     val scrollState = rememberScrollState()
     val context = LocalContext.current
     val popUpDialog = remember { mutableStateOf(false) }
-    val customSounds = remember { mutableStateListOf<Sounds>()}
+    val customSounds = remember { mutableStateListOf<Noise>()}
 
 
-    LaunchedEffect(Unit) {
+    LaunchedEffect(customSounds.size) {
         val loaded = loadSounds(context, SOUNDS_FILE_PATH)
         customSounds.clear()
         customSounds.addAll(loaded)
-        Log.d("TESTIN", "Hello $loaded")
     }
 
     Box(
@@ -81,7 +79,7 @@ fun Library() {
 
             ShowSounds(defaultSounds, context)
 
-            ShowSounds(customSounds, context)
+            ShowCustomSounds(customSounds, context)
         }
 
         OutlinedButton(
@@ -104,49 +102,4 @@ fun Library() {
     }
 }
 
-@Composable
-fun ShowSounds(sounds: List<Sounds>, context: Context) {
-    sounds.forEach { sound ->
-        Box(
-            modifier = Modifier
-                .fillMaxWidth(0.95f)
-                .border(
-                    width = 1.dp,
-                    color = Color.LightGray,
-                    shape = RoundedCornerShape(12.dp)
-                )
-                .padding(12.dp)
-                .clickable {
-                    AudioPlayer.playAsset(context, sound)
-                }
-        ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                val isSvg = sound.imagePath.endsWith(".svg", ignoreCase = true)
 
-                if (isSvg) {
-                    SvgImageFromAssets(
-                        sound.imagePath,
-                        modifier = Modifier.size(40.dp)
-                    )
-                } else {
-                    Image(
-                        painter = rememberAsyncImagePainter(File(sound.imagePath)),
-                        contentDescription = null,
-                        modifier = Modifier.size(40.dp)
-                    )
-                }
-
-                Column {
-                    Text(text = sound.title, style = MaterialTheme.typography.titleMedium)
-                    Text(
-                        text = sound.description,
-                        style = MaterialTheme.typography.bodySmall
-                    )
-                }
-            }
-        }
-    }
-}

@@ -1,0 +1,35 @@
+package com.sonnenstahl.audioman.utils
+
+import kotlinx.serialization.Serializable
+
+const val DEFAULT_AUDIO_URI: String = "default.m4a";
+const val DEFAULT_IMAGE_URI: String = "default.svg";
+
+@Serializable
+data class Noise(
+    var title:       String,
+    var description: String,
+    var audioPath:   String = DEFAULT_AUDIO_URI,
+    var imagePath:   String = DEFAULT_IMAGE_URI
+)
+
+val fallBackSound = Noise("Nothing", "Nothing is player", "")
+
+val defaultSounds = listOf(
+    Noise("Coffee Shop" , "people talking in a coffee shop" , "coffee_shop.m4a"),
+    Noise("Rain"        , "rain outside of your window"     , "rain.m4a"),
+    Noise("Forest"      , "wild forest"                     , "forest.m4a"),
+    Noise("Campfire"    , "sitting by the campfire"         , "fire.m4a"),
+    Noise("City Traffic", "cars honking at each other"      , "city.m4a")
+)
+
+/**
+ * This data class is to tell exactly
+ * which fields are valid and which are not
+ */
+data class ValidNoise(
+    var title:       Boolean = true,
+    var description: Boolean = true,
+    var audioPath:   Boolean = true,
+    var imagePath:   Boolean = true
+)
