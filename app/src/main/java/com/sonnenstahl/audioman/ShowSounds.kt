@@ -24,6 +24,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -86,12 +87,13 @@ fun ShowSounds(sounds: List<Noise>, context: Context) {
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun ShowCustomSounds(sounds: SnapshotStateList<Noise>, context: Context) {
+fun ShowCustomSounds(sounds: SnapshotStateList<Noise>, count: MutableState<Int>, context: Context) {
     sounds.forEach { sound ->
         val dismissState = rememberDismissState(
             confirmStateChange = {
                 if (it == DismissValue.DismissedToStart) {
                     sounds.remove(sound)
+                    count.value++
                     saveSounds(context, sounds, SOUNDS_FILE_PATH)
                     true
                 } else false

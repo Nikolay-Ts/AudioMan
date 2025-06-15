@@ -24,6 +24,7 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -51,9 +52,10 @@ fun Library() {
     val context = LocalContext.current
     val popUpDialog = remember { mutableStateOf(false) }
     val customSounds = remember { mutableStateListOf<Noise>()}
+    val remcomposeCounter = remember { mutableIntStateOf (0) }
 
 
-    LaunchedEffect(customSounds.size) {
+    LaunchedEffect(remcomposeCounter.intValue) {
         val loaded = loadSounds(context, SOUNDS_FILE_PATH)
         customSounds.clear()
         customSounds.addAll(loaded)
@@ -79,7 +81,7 @@ fun Library() {
 
             ShowSounds(defaultSounds, context)
 
-            ShowCustomSounds(customSounds, context)
+            ShowCustomSounds(customSounds, remcomposeCounter, context)
         }
 
         OutlinedButton(
