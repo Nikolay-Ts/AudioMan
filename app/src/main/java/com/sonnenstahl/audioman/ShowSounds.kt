@@ -87,69 +87,65 @@ fun ShowSounds(sounds: List<Noise>, context: Context) {
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun ShowCustomSounds(sounds: SnapshotStateList<Noise>, context: Context) {
-    Column {
-        sounds.forEach { sound ->
-            val dismissState = rememberDismissState(
-                confirmStateChange = {
-                    if (it == DismissValue.DismissedToStart) {
-                        sounds.remove(sound)
-                        saveSounds(context, sounds, SOUNDS_FILE_PATH)
-                        true
-                    } else false
-                }
-            )
+    sounds.forEach { sound ->
+        val dismissState = rememberDismissState(
+            confirmStateChange = {
+                if (it == DismissValue.DismissedToStart) {
+                    sounds.remove(sound)
+                    saveSounds(context, sounds, SOUNDS_FILE_PATH)
+                    true
+                } else false
+            }
+        )
 
-            SwipeToDismiss(
-                state = dismissState,
-                directions = setOf(DismissDirection.EndToStart),
-                dismissContent = {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth(0.95f)
-                            .border(
-                                width = 1.dp,
-                                color = Color.LightGray,
-                                shape = RoundedCornerShape(12.dp)
-                            )
-                            .padding(12.dp)
-                            .clickable {
-                                AudioPlayer.playAsset(context, sound)
-                            }
+        SwipeToDismiss(
+            state = dismissState,
+            directions = setOf(DismissDirection.EndToStart),
+            dismissContent = {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth(0.95f)
+                        .border(
+                            width = 1.dp,
+                            color = Color.LightGray,
+                            shape = RoundedCornerShape(12.dp)
+                        )
+                        .padding(12.dp)
+                        .clickable {
+                            AudioPlayer.playAsset(context, sound)
+                        }
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(12.dp)
-                        ) {
-                            val isSvg = sound.imagePath.endsWith(".svg", ignoreCase = true)
+                        val isSvg = sound.imagePath.endsWith(".svg", ignoreCase = true)
 
-                            if (isSvg) {
-                                SvgImageFromAssets(
-                                    sound.imagePath,
-                                    modifier = Modifier.size(40.dp)
-                                )
-                            } else {
-                                Image(
-                                    painter = rememberAsyncImagePainter(File(sound.imagePath)),
-                                    contentDescription = null,
-                                    modifier = Modifier.size(40.dp)
-                                )
-                            }
+                        if (isSvg) {
+                            SvgImageFromAssets(
+                                sound.imagePath,
+                                modifier = Modifier.size(40.dp)
+                            )
+                        } else {
+                            Image(
+                                painter = rememberAsyncImagePainter(File(sound.imagePath)),
+                                contentDescription = null,
+                                modifier = Modifier.size(40.dp)
+                            )
+                        }
 
-                            Column {
-                                Text(
-                                    text = sound.title,
-                                    style = MaterialTheme.typography.titleMedium
-                                )
-                                Text(
-                                    text = sound.description,
-                                    style = MaterialTheme.typography.bodySmall
-                                )
-                            }
+                        Column {
+                            Text(text = sound.title, style = MaterialTheme.typography.titleMedium)
+                            Text(
+                                text = sound.description,
+                                style = MaterialTheme.typography.bodySmall
+                            )
                         }
                     }
-                },
-                background = {}
-            )
-        }
+                }
+            },
+            background = {}
+        )
     }
+
 }
