@@ -1,7 +1,9 @@
 package com.sonnenstahl.audioman
 
 import android.content.Context
+import android.os.Build
 import android.util.Log
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -46,6 +48,7 @@ import java.io.File
  * This is where the users can decided what to listen to. This will also allow the user
  * to add custom tracks to their library
  */
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun Library() {
     val scrollState = rememberScrollState()

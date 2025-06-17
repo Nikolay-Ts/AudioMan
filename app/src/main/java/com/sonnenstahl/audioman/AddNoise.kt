@@ -25,11 +25,14 @@ import android.net.Uri
 import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.Image
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.platform.LocalContext
-import androidx.core.net.toUri
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import coil.compose.rememberAsyncImagePainter
+import com.sonnenstahl.audioman.ui.theme.Teal
 import com.sonnenstahl.audioman.utils.DEFAULT_AUDIO_URI
 import com.sonnenstahl.audioman.utils.DEFAULT_IMAGE_URI
 import com.sonnenstahl.audioman.utils.SOUNDS_FILE_PATH
@@ -47,6 +50,7 @@ fun AddNoise(
     onDismiss: () -> Unit,
 ) {
     val context = LocalContext.current
+    val keyboard = LocalSoftwareKeyboardController.current
     val title = remember { mutableStateOf("") }
     val supportTitle = remember { mutableStateOf("") } // for when the user gets it wrong
     val notUnique = remember { mutableStateOf(false) }
@@ -148,13 +152,17 @@ fun AddNoise(
                             .fillMaxWidth()
                     ) {
                         OutlinedButton(
-                            onClick = { audioPickerLauncher.launch("audio/*") },
+                            onClick = {
+                                keyboard?.hide()
+                                audioPickerLauncher.launch("audio/*")
+                              },
                             modifier = Modifier.fillMaxWidth()
                         ) {
                             Text(if (audioUri.value != null)
                                 "Selected: ${audioUri.value?.lastPathSegment}"
                             else
-                                "Track")
+                                "Track",
+                                color = Color.White)
                         }
                         Text(
                             text = supportaudio.value,
@@ -166,7 +174,10 @@ fun AddNoise(
                     }
 
                     OutlinedButton(
-                        onClick = { imagePickerLauncher.launch("image/*") },
+                        onClick = {
+                            keyboard?.hide()
+                            imagePickerLauncher.launch("image/*")
+                          },
                         modifier = Modifier
                             .padding(horizontal = 16.dp)
                             .fillMaxWidth()
@@ -174,7 +185,8 @@ fun AddNoise(
                         Text(if (imageUri.value != null)
                             "Selected Image: ${imageUri.value?.lastPathSegment}"
                         else
-                            "Cover")
+                            "Cover",
+                            color = Color.White)
                     }
 
                     imageUri.value?.let { uri ->
@@ -185,7 +197,7 @@ fun AddNoise(
                                 return@Button
                             }
                         ) {
-                            androidx.compose.foundation.Image(
+                            Image(
                                 painter = rememberAsyncImagePainter(uri),
                                 contentDescription = "Selected Image",
                                 modifier = Modifier
@@ -197,7 +209,11 @@ fun AddNoise(
                     }
 
                     Button(
-                        modifier = Modifier.padding(bottom = 20.dp),
+                        modifier = Modifier
+                            .padding(bottom = 20.dp)
+                            .padding(horizontal = 10.dp)
+                            .fillMaxWidth(),
+                        colors = ButtonDefaults.buttonColors(containerColor = Teal),
                         onClick = {
                             val storedAudioPath = audioUri.value?.let {
                                 saveUri(context, it, "audio_${System.currentTimeMillis()}")
@@ -218,8 +234,6 @@ fun AddNoise(
 
                             notUnique.value =  soundsList.any { it.title == newNoise.title }
 
-                            Log.d("MEOW MEOW", "path: ${validNoise.value.audioPath}\nmoew ${validNoise.value.title}\nempty: ${title.value}\n notUnique: $notUnique")
-
                             if (!validNoise.value.title) {
                                 supportTitle.value = "Each Sound deserves a title"
                                 return@Button
@@ -233,8 +247,6 @@ fun AddNoise(
                                 return@Button
                             }
 
-
-
                             soundsList.add(newNoise)
                             saveSounds(context, soundsList, SOUNDS_FILE_PATH)
 
@@ -247,7 +259,7 @@ fun AddNoise(
                             onDismiss()
                         }
                     ) {
-                        Text("Add Noise")
+                        Text("Add Noise", color=Color.White)
                     }
                 }
             }

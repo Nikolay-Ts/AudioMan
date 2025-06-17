@@ -1,14 +1,20 @@
+
 package com.sonnenstahl.audioman
 
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.Icon
 import android.content.Context
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -17,7 +23,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.DismissDirection
 import androidx.compose.material.DismissValue
 import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.Surface
 import androidx.compose.material.SwipeToDismiss
 import androidx.compose.material.rememberDismissState
 import androidx.compose.material3.MaterialTheme
@@ -31,6 +36,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import coil.compose.rememberAsyncImagePainter
+import com.sonnenstahl.audioman.ui.theme.Teal
 import com.sonnenstahl.audioman.utils.AudioPlayer
 import com.sonnenstahl.audioman.utils.Noise
 import com.sonnenstahl.audioman.utils.SOUNDS_FILE_PATH
@@ -38,12 +44,18 @@ import com.sonnenstahl.audioman.utils.saveSounds
 import java.io.File
 import kotlin.collections.forEach
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun ShowSounds(sounds: List<Noise>, context: Context) {
+    LaunchedEffect(Unit) {
+        AudioPlayer.initialize(context)
+    }
+
     sounds.forEach { sound ->
         Box(
             modifier = Modifier
                 .fillMaxWidth(0.95f)
+                .background(Teal, shape = RoundedCornerShape(12.dp))
                 .border(
                     width = 1.dp,
                     color = Color.LightGray,
@@ -85,9 +97,14 @@ fun ShowSounds(sounds: List<Noise>, context: Context) {
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun ShowCustomSounds(sounds: SnapshotStateList<Noise>, count: MutableState<Int>, context: Context) {
+    LaunchedEffect(Unit) {
+        AudioPlayer.initialize(context)
+    }
+
     sounds.forEach { sound ->
         val dismissState = rememberDismissState(
             confirmStateChange = {
@@ -107,6 +124,7 @@ fun ShowCustomSounds(sounds: SnapshotStateList<Noise>, count: MutableState<Int>,
                 Box(
                     modifier = Modifier
                         .fillMaxWidth(0.95f)
+                        .background(Teal, shape = RoundedCornerShape(12.dp))
                         .border(
                             width = 1.dp,
                             color = Color.LightGray,
@@ -146,7 +164,23 @@ fun ShowCustomSounds(sounds: SnapshotStateList<Noise>, count: MutableState<Int>,
                     }
                 }
             },
-            background = {}
+            background = {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth(0.95f)
+                        .height(72.dp)
+                        .padding(horizontal = 12.dp)
+                        .background(Teal, shape = RoundedCornerShape(12.dp)),
+                    contentAlignment = Alignment.CenterEnd
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Delete,
+                        contentDescription = "Delete",
+                        tint = Color.White,
+                        modifier = Modifier.padding(end = 24.dp).size(32.dp)
+                    )
+                }
+            }
         )
     }
 

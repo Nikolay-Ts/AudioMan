@@ -1,36 +1,40 @@
 package com.sonnenstahl.audioman.utils
 
-import androidx.media3.common.MediaItem
-import androidx.media3.exoplayer.ExoPlayer
 import android.content.Context
+import android.content.Intent
+import android.net.Uri
+import android.os.Build
+import androidx.annotation.RequiresApi
+import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
+import androidx.core.net.toUri
 
-
-/**
- * This is a singleton that allows to play the sounds from assets
- * This allows also the import of custom sounds from the user themselves
- * the player uses M3's exoplayer
- */
 object AudioPlayer {
-    private var exoPlayer: ExoPlayer? = null
     private var sound: Noise? = null
 
-    fun initialize(context: Context) {
-        if (exoPlayer == null) {
-            exoPlayer = ExoPlayer.Builder(context).build()
-        }
+    private fun getPlayer(): Player? {
+        return AudioService.instance?.getPlayer()
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
+    fun initialize(context: Context) {
+        // Start the MediaSessionService
+        val intent = Intent(context, AudioService::class.java)
+        context.startForegroundService(intent)
+    }
+
+    @RequiresApi(Build.VERSION_CODES.O)
     fun playAsset(context: Context, sound: Noise) {
         initialize(context)
+
         val mediaItem = if (sound.audioPath.startsWith("audio_") || sound.audioPath.endsWith(".m4a")) {
-            val assetUri = "asset:///${sound.audioPath}"
-            MediaItem.fromUri(assetUri)
+            val assetUri = "asset:///${sound.audioPath}".toUri()
+            MediaItem.Builder().setUri(assetUri).build()
         } else {
             MediaItem.fromUri(sound.audioPath)
         }
 
-        exoPlayer?.apply {
+        getPlayer()?.apply {
             setMediaItem(mediaItem)
             repeatMode = Player.REPEAT_MODE_ONE
             prepare()
@@ -39,8 +43,18 @@ object AudioPlayer {
 
         this.sound = sound
     }
-    fun getSound() = sound ?: fallBackSound
-    fun pause() = exoPlayer?.pause()
-    fun play() = exoPlayer?.play()
-    fun isPlaying() = exoPlayer?.isPlaying ?: false
+
+    fun pause() {
+        getPlayer()?.pause()
+    }
+
+    fun play() {
+        getPlayer()?.play()
+    }
+
+    fun isPlaying(): Boolean {
+        return getPlayer()?.isPlaying ?: false
+    }
+
+    fun getSound(): Noise = sound ?: fallBackSound
 }
