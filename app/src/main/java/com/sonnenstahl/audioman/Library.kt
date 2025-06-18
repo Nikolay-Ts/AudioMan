@@ -1,24 +1,16 @@
 package com.sonnenstahl.audioman
 
-import android.content.Context
 import android.os.Build
-import android.util.Log
 import androidx.annotation.RequiresApi
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
@@ -35,13 +27,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import coil.compose.rememberAsyncImagePainter
-import com.sonnenstahl.audioman.utils.AudioPlayer
 import com.sonnenstahl.audioman.utils.SOUNDS_FILE_PATH
 import com.sonnenstahl.audioman.utils.Noise
 import com.sonnenstahl.audioman.utils.defaultSounds
 import com.sonnenstahl.audioman.utils.loadSounds
-import java.io.File
 
 
 /**
@@ -55,10 +44,10 @@ fun Library() {
     val context = LocalContext.current
     val popUpDialog = remember { mutableStateOf(false) }
     val customSounds = remember { mutableStateListOf<Noise>()}
-    val remcomposeCounter = remember { mutableIntStateOf (0) }
+    val recomposeCounter = remember { mutableIntStateOf (0) }
 
 
-    LaunchedEffect(remcomposeCounter.intValue) {
+    LaunchedEffect(recomposeCounter.intValue) {
         val loaded = loadSounds(context, SOUNDS_FILE_PATH)
         customSounds.clear()
         customSounds.addAll(loaded)
@@ -84,7 +73,7 @@ fun Library() {
 
             ShowSounds(defaultSounds, context)
 
-            ShowCustomSounds(customSounds, remcomposeCounter, context)
+            ShowCustomSounds(customSounds, recomposeCounter, context)
         }
 
         OutlinedButton(

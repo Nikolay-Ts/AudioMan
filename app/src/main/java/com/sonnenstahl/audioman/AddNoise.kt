@@ -22,12 +22,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import android.net.Uri
-import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
@@ -101,6 +100,10 @@ fun AddNoise(
                     ) {
                         TextField(
                             value = title.value,
+                            colors = TextFieldDefaults.colors(
+                                unfocusedLabelColor = Color.White,
+                                focusedTextColor = Color.White,
+                            ),
                             onValueChange = {
                                 title.value = it
                                 if (!validNoise.value.title) {
@@ -136,6 +139,10 @@ fun AddNoise(
 
                     TextField(
                         value = description.value,
+                        colors = TextFieldDefaults.colors(
+                                unfocusedLabelColor = Color.White,
+                                focusedTextColor = Color.White,
+                            ),
                         onValueChange = { description.value = it },
                         modifier = Modifier
                             .padding(horizontal = 16.dp)

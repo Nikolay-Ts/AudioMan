@@ -27,11 +27,24 @@ object AudioPlayer {
     fun playAsset(context: Context, sound: Noise) {
         initialize(context)
 
-        val mediaItem = if (sound.audioPath.startsWith("audio_") || sound.audioPath.endsWith(".m4a")) {
-            val assetUri = "asset:///${sound.audioPath}".toUri()
-            MediaItem.Builder().setUri(assetUri).build()
-        } else {
-            MediaItem.fromUri(sound.audioPath)
+        val mediaItem = when {
+            sound.audioPath.startsWith("file:/") || sound.audioPath.startsWith("/data/") -> {
+                // Internal storage or file URI
+                MediaItem.fromUri(sound.audioPath.toUri())
+            }
+            sound.audioPath.startsWith("content:/") -> {
+                // Content URI from picker or external apps
+                MediaItem.fromUri(sound.audioPath.toUri())
+            }
+            sound.audioPath.endsWith(".m4a") || sound.audioPath.endsWith(".mp3") -> {
+                // Assume internal storage path
+                MediaItem.fromUri(sound.audioPath.toUri())
+            }
+            else -> {
+                // Fallback to asset URI if nothing else matches
+                val assetUri = "asset:///${sound.audioPath}".toUri()
+                MediaItem.Builder().setUri(assetUri).build()
+            }
         }
 
         getPlayer()?.apply {

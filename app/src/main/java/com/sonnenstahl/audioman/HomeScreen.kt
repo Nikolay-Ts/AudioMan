@@ -1,6 +1,11 @@
 package com.sonnenstahl.audioman
 
+import android.graphics.Bitmap
+import java.io.File
+
 import android.graphics.BitmapFactory
+import android.graphics.Matrix
+import android.media.ExifInterface
 import androidx.annotation.OptIn
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
@@ -38,20 +43,53 @@ fun HomeScreen(navController: NavController) {
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-
-        // if the image is an svg load it as one, otherwise as a regular Image
         if (currentlyPLaying.imagePath.substringAfter(".", "") == "svg") {
             SvgImageFromAssets(
                 currentlyPLaying.imagePath,
                 modifier = Modifier.size(120.dp)
             )
         } else {
-            val bitmap = BitmapFactory.decodeStream(context.assets.open(currentlyPLaying.imagePath))
-            Image(
-                bitmap = bitmap.asImageBitmap(),
-                contentDescription = "Asset Image",
-                modifier = Modifier.size(120.dp)
-            )
+            val imagePath = currentlyPLaying.imagePath
+            val imageFile = File(imagePath)
+
+            if (imageFile.exists()) {
+                val bitmap = runCatching {
+                    val originalBitmap = BitmapFactory.decodeFile(imageFile.absolutePath)
+                    val exif = ExifInterface(imageFile.absolutePath)
+                    val orientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL)
+
+                    when (orientation) {
+                        ExifInterface.ORIENTATION_ROTATE_90 -> Bitmap.createBitmap(originalBitmap, 0, 0, originalBitmap.width, originalBitmap.height, Matrix().apply { postRotate(90f) }, true)
+                        ExifInterface.ORIENTATION_ROTATE_180 -> Bitmap.createBitmap(originalBitmap, 0, 0, originalBitmap.width, originalBitmap.height, Matrix().apply { postRotate(180f) }, true)
+                        ExifInterface.ORIENTATION_ROTATE_270 -> Bitmap.createBitmap(originalBitmap, 0, 0, originalBitmap.width, originalBitmap.height, Matrix().apply { postRotate(270f) }, true)
+                        else -> originalBitmap
+                    }
+                }.getOrNull()
+
+                if (bitmap != null) {
+                    Image(
+                        bitmap = bitmap.asImageBitmap(),
+                        contentDescription = "User Image",
+                        modifier = Modifier.size(120.dp)
+                    )
+                }
+            } else {
+                val assetBitmap = runCatching {
+                    context.assets.open(imagePath).use { inputStream ->
+                        BitmapFactory.decodeStream(inputStream)
+                    }
+                }.getOrNull()
+
+                if (assetBitmap != null) {
+                    Image(
+                        bitmap = assetBitmap.asImageBitmap(),
+                        contentDescription = "Asset Image",
+                        modifier = Modifier.size(120.dp)
+                    )
+                } else {
+                    Log.e("HomeScreen", "Failed to decode asset image: $imagePath")
+                }
+            }
         }
 
         Column {
