@@ -73,7 +73,7 @@ fun Library() {
 
             ShowSounds(defaultSounds, context)
 
-            ShowCustomSounds(customSounds, recomposeCounter, context)
+            ShowCustomSounds(customSounds, recomposeCounter, popUpDialog, context)
         }
 
         OutlinedButton(

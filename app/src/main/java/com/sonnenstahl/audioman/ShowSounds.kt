@@ -1,4 +1,3 @@
-
 package com.sonnenstahl.audioman
 
 import androidx.compose.material.icons.Icons
@@ -6,11 +5,16 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.Icon
 import android.content.Context
 import android.os.Build
+import android.os.VibrationEffect
+import android.os.Vibrator
+import android.os.VibratorManager
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -35,6 +39,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
 import com.sonnenstahl.audioman.ui.theme.Teal
 import com.sonnenstahl.audioman.utils.AudioPlayer
@@ -98,9 +103,14 @@ fun ShowSounds(sounds: List<Noise>, context: Context) {
 }
 
 @RequiresApi(Build.VERSION_CODES.O)
-@OptIn(ExperimentalMaterialApi::class)
+@OptIn(ExperimentalMaterialApi::class, ExperimentalFoundationApi::class)
 @Composable
-fun ShowCustomSounds(sounds: SnapshotStateList<Noise>, count: MutableState<Int>, context: Context) {
+fun ShowCustomSounds(
+    sounds: SnapshotStateList<Noise>,
+    count: MutableState<Int>,
+    popUpDialog: MutableState<Boolean>,
+    context: Context
+) {
     LaunchedEffect(Unit) {
         AudioPlayer.initialize(context)
     }
@@ -112,8 +122,18 @@ fun ShowCustomSounds(sounds: SnapshotStateList<Noise>, count: MutableState<Int>,
                     sounds.remove(sound)
                     count.value++
                     saveSounds(context, sounds, SOUNDS_FILE_PATH)
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                        val vibratorManager = context.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as android.os.VibratorManager
+                        val vibrator = vibratorManager.defaultVibrator
+                        vibrator.vibrate(VibrationEffect.createOneShot(300, VibrationEffect.DEFAULT_AMPLITUDE))
+                    } else {
+                        val vibrator = context.getSystemService(Context.VIBRATOR_SERVICE) as android.os.Vibrator
+                        vibrator.vibrate(300)
+                    }
                     true
-                } else false
+                } else {
+                    false
+                }
             }
         )
 
@@ -131,9 +151,20 @@ fun ShowCustomSounds(sounds: SnapshotStateList<Noise>, count: MutableState<Int>,
                             shape = RoundedCornerShape(12.dp)
                         )
                         .padding(12.dp)
-                        .clickable {
-                            AudioPlayer.playAsset(context, sound)
-                        }
+                        .combinedClickable(
+                            onClick = { AudioPlayer.playAsset(context, sound) },
+                            onLongClick = {
+                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                                    val vibratorManager = context.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as android.os.VibratorManager
+                                    val vibrator = vibratorManager.defaultVibrator
+                                    vibrator.vibrate(VibrationEffect.createOneShot(150, VibrationEffect.DEFAULT_AMPLITUDE))
+                                } else {
+                                    val vibrator = context.getSystemService(Context.VIBRATOR_SERVICE) as android.os.Vibrator
+                                    vibrator.vibrate(150)
+                                }
+                                popUpDialog.value = true
+                            }
+                        )
                 ) {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
@@ -170,7 +201,7 @@ fun ShowCustomSounds(sounds: SnapshotStateList<Noise>, count: MutableState<Int>,
                         .fillMaxWidth(0.95f)
                         .height(72.dp)
                         .padding(horizontal = 12.dp)
-                        .background(Teal, shape = RoundedCornerShape(12.dp)),
+                        .background(Color.Red, shape = RoundedCornerShape(12.dp)),
                     contentAlignment = Alignment.CenterEnd
                 ) {
                     Icon(
