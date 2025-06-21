@@ -13,7 +13,7 @@ data class Noise(
     var imagePath:   String = DEFAULT_IMAGE_URI
 )
 
-val fallBackSound = Noise("Nothing", "Nothing is player", "")
+val fallBackSound = Noise("Nothing Selected", "Pick a Sound from the library!", "")
 
 val defaultSounds = listOf(
     Noise("Coffee Shop" , "people talking in a coffee shop" , "coffee_shop.m4a"),

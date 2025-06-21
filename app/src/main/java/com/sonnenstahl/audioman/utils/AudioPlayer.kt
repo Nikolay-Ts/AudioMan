@@ -27,12 +27,12 @@ object AudioPlayer {
     fun playAsset(context: Context, sound: Noise) {
         initialize(context)
 
-        val mediaItem = if (sound.audioPath.startsWith("audio_") || sound.audioPath.endsWith(".m4a")) {
+        val mediaItem = if (!sound.audioPath.contains("/") && !sound.audioPath.startsWith("content:")) {
             // asset sound
             val assetUri = "asset:///${sound.audioPath}".toUri()
             MediaItem.Builder().setUri(assetUri).build()
         } else {
-            // external file
+            // external file (file:// or content://)
             MediaItem.fromUri(sound.audioPath)
         }
 
@@ -55,7 +55,7 @@ object AudioPlayer {
     }
 
     fun isPlaying(): Boolean {
-        return getPlayer()?.isPlaying ?: false
+        return getPlayer()?.isPlaying == true
     }
 
     fun getSound(): Noise = sound ?: fallBackSound

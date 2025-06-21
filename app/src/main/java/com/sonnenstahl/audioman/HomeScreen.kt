@@ -6,8 +6,11 @@ import java.io.File
 import android.graphics.BitmapFactory
 import android.graphics.Matrix
 import android.media.ExifInterface
+import android.os.Build
 import androidx.annotation.OptIn
+import androidx.annotation.RequiresApi
 import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -17,6 +20,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ModalDrawer
 import androidx.compose.runtime.getValue
@@ -32,29 +37,37 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import androidx.media3.common.util.Log
 import androidx.media3.common.util.UnstableApi
 import androidx.navigation.NavController
-import com.sonnenstahl.audioman.AnimatedPause
 import com.sonnenstahl.audioman.utils.AudioPlayer
 import com.sonnenstahl.audioman.utils.CURRENT_SOUND_PATH
-import com.sonnenstahl.audioman.utils.fallBackSound
 import com.sonnenstahl.audioman.utils.loadSound
 
 const val PLAYING_IMAGE_SIZE: Int = 250;
 const val PAUSED_IMAGE_SIZE: Int = (PLAYING_IMAGE_SIZE*0.75).toInt()
 
+@RequiresApi(Build.VERSION_CODES.O)
 @OptIn(UnstableApi::class)
 @Composable
 fun HomeScreen(navController: NavController) {
     val context = LocalContext.current
     val isPlaying = remember { mutableStateOf(AudioPlayer.isPlaying()) }
-    AudioPlayer.setSound(loadSound(context, CURRENT_SOUND_PATH))
-    val currentlyPLaying = AudioPlayer.getSound()
+    val currentlyPLaying = remember { mutableStateOf(AudioPlayer.getSound()) }
+
+    LaunchedEffect(Unit) {
+        AudioPlayer.initialize(context)
+        AudioPlayer.setSound(loadSound(context, CURRENT_SOUND_PATH))
+        val loadedSound = AudioPlayer.getSound()
+        currentlyPLaying.value = loadedSound
+    }
+
     val imageSize by animateDpAsState(
         targetValue = if (isPlaying.value) PLAYING_IMAGE_SIZE.dp else PAUSED_IMAGE_SIZE.dp,
         label = "imageSizeAnimation"
@@ -64,13 +77,26 @@ fun HomeScreen(navController: NavController) {
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
     ) {
-        if (currentlyPLaying.imagePath.substringAfter(".", "") == "svg") {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(top = 100.dp),
+            contentAlignment = Alignment.TopCenter
+        ) {
+            Text(
+                text = "Currently Playing",
+                style = MaterialTheme.typography.titleLarge,
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
+        }
+
+        if (currentlyPLaying.value.imagePath.substringAfter(".", "") == "svg") {
             SvgImageFromAssets(
-                currentlyPLaying.imagePath,
+                currentlyPLaying.value.imagePath,
                 modifier = Modifier.size(imageSize)
             )
         } else {
-            val imagePath = currentlyPLaying.imagePath
+            val imagePath = currentlyPLaying.value.imagePath
             val imageFile = File(imagePath)
 
             if (imageFile.exists()) {
@@ -98,6 +124,7 @@ fun HomeScreen(navController: NavController) {
                             contentDescription = "User Image",
                             modifier = Modifier
                                 .size(imageSize)
+                                .clip(RoundedCornerShape(16.dp))
                                 .border(2.dp, Color.Gray, RoundedCornerShape(16.dp))
                         )
                     }
@@ -119,6 +146,7 @@ fun HomeScreen(navController: NavController) {
                             contentDescription = "Asset Image",
                             modifier = Modifier
                                 .size(imageSize)
+                                .clip(RoundedCornerShape(16.dp))
                                 .border(2.dp, Color.Gray, RoundedCornerShape(16.dp))
                         )
                     }
@@ -137,8 +165,15 @@ fun HomeScreen(navController: NavController) {
                     .padding(20.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Text(currentlyPLaying.title)
-                Text(currentlyPLaying.description)
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier.align(Alignment.CenterHorizontally)
+                ) {
+                    Text(currentlyPLaying.value.title)
+                    Text(currentlyPLaying.value.description)
+                }
+
+                Spacer(modifier = Modifier.height(24.dp))
 
                 AnimatedPause(isPlaying.value) {
                     when (isPlaying.value) {
