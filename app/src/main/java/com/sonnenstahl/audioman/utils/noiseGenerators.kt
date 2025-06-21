@@ -5,7 +5,6 @@ import android.content.Context
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.graphics.Color
 import com.sonnenstahl.audioman.ui.theme.Brown
 import com.sonnenstahl.audioman.ui.theme.Pink40
@@ -99,19 +98,22 @@ fun updateGraphData(
 
     samplesState.value = generateNoiseSamples(noiseType, amplitude, spectrum, sampleRate, durationSec)
 
-    val path = writeWav(samplesState.value, sampleRate, file)
-    val sound = Noise(
-        "Generated Noise",
-        "Noise generated via sliders",
-        path
-    )
-
     lineColor.value = when (noiseType) {
-        "White" -> Color.White
+        "White" -> Color.Gray
         "Pink"  -> Pink40
         "Brown" -> Brown
         else -> Color.White
     }
+
+
+    val audioPath = writeWav(samplesState.value, sampleRate, file)
+
+    val sound = Noise(
+        "Generated Noise",
+        "Noise generated via sliders",
+        audioPath,
+    )
+
 
     saveSound(context, sound, CURRENT_SOUND_PATH)
     AudioPlayer.playAsset(context, sound)

@@ -13,6 +13,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.unit.dp
+import com.sonnenstahl.audioman.ui.theme.LightTeal
 import com.sonnenstahl.audioman.ui.theme.Teal
 import com.sonnenstahl.audioman.utils.AudioPlayer
 import com.sonnenstahl.audioman.utils.CURRENT_SOUND_PATH
@@ -50,8 +51,10 @@ fun NoiseGenUI() {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Spacer(modifier = Modifier.weight(1f))
+
             FrequencyGraph(samples = previewSamples.value, lineColor = lineColor.value)
             Spacer(modifier = Modifier.weight(1f))
+
 
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text("Noise Type: ")
@@ -137,7 +140,7 @@ fun SliderWithLabel(
     onChange: (Float) -> Unit,
     onFinalChange: () -> Unit
 ) {
-    Column {
+    Column(modifier = Modifier.padding(15.dp)) {
         Text("$label: ${"%.2f".format(value)}")
         Slider(
             value = value,
@@ -146,13 +149,14 @@ fun SliderWithLabel(
             valueRange = range,
             colors = SliderDefaults.colors(
                 thumbColor = Teal,
-                activeTrackColor = Teal,
+                activeTrackColor = LightTeal,
                 inactiveTrackColor = Color.White
             )
         )
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun DropdownMenuBox(options: List<String>, selected: String, onSelectedChange: (String) -> Unit) {
     var expanded by remember { mutableStateOf(false) }
