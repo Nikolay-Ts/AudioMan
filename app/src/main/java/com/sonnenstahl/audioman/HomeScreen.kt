@@ -41,7 +41,9 @@ import androidx.media3.common.util.UnstableApi
 import androidx.navigation.NavController
 import com.sonnenstahl.audioman.AnimatedPause
 import com.sonnenstahl.audioman.utils.AudioPlayer
+import com.sonnenstahl.audioman.utils.CURRENT_SOUND_PATH
 import com.sonnenstahl.audioman.utils.fallBackSound
+import com.sonnenstahl.audioman.utils.loadSound
 
 const val PLAYING_IMAGE_SIZE: Int = 250;
 const val PAUSED_IMAGE_SIZE: Int = (PLAYING_IMAGE_SIZE*0.75).toInt()
@@ -51,6 +53,7 @@ const val PAUSED_IMAGE_SIZE: Int = (PLAYING_IMAGE_SIZE*0.75).toInt()
 fun HomeScreen(navController: NavController) {
     val context = LocalContext.current
     val isPlaying = remember { mutableStateOf(AudioPlayer.isPlaying()) }
+    AudioPlayer.setSound(loadSound(context, CURRENT_SOUND_PATH))
     val currentlyPLaying = AudioPlayer.getSound()
     val imageSize by animateDpAsState(
         targetValue = if (isPlaying.value) PLAYING_IMAGE_SIZE.dp else PAUSED_IMAGE_SIZE.dp,

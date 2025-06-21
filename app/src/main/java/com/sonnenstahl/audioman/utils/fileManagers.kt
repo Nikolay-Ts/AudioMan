@@ -12,7 +12,9 @@ import kotlinx.serialization.encodeToString
 import java.io.FileNotFoundException
 
 
-const val SOUNDS_FILE_PATH: String = "sounds.json"
+const val SOUNDS_FILE_PATH: String   = "sounds.json"
+const val CURRENT_SOUND_PATH: String = "current.json"
+
 
 // TODO: add all of the serialisation of the data class Sounds
 /**
@@ -66,6 +68,31 @@ fun loadSounds(context: Context, filepath: String): MutableList<Noise> {
 
     } catch (e: FileNotFoundException) {
         mutableStateListOf<Noise>()
+    }
+}
+
+fun saveSound(
+    context: Context,
+    sounds: Noise,
+    filepath: String
+) {
+    try {
+        val json = Json.encodeToString(sounds)
+        val file = File(context.filesDir, filepath)
+        file.writeText(json)
+    } catch (e: Exception) {
+        Log.d("MEOW", e.toString())
+    }
+}
+
+fun loadSound(context: Context, filepath: String): Noise? {
+    val file = File(context.filesDir, filepath)
+    return try {
+        val jsonString = file.readText()
+        Json.decodeFromString<Noise>(jsonString)
+
+    } catch (e: FileNotFoundException) {
+       null
     }
 }
 

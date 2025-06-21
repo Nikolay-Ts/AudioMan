@@ -60,6 +60,10 @@ object AudioPlayer {
 
     fun getSound(): Noise = sound ?: fallBackSound
 
+    fun setSound(noise: Noise?) {
+        sound = noise
+    }
+
     fun clearSound() {
         sound = null
     }

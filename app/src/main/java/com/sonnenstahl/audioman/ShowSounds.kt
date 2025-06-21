@@ -43,8 +43,12 @@ import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
 import com.sonnenstahl.audioman.ui.theme.Teal
 import com.sonnenstahl.audioman.utils.AudioPlayer
+import com.sonnenstahl.audioman.utils.CURRENT_SOUND_PATH
 import com.sonnenstahl.audioman.utils.Noise
 import com.sonnenstahl.audioman.utils.SOUNDS_FILE_PATH
+import com.sonnenstahl.audioman.utils.defaultSounds
+import com.sonnenstahl.audioman.utils.fallBackSound
+import com.sonnenstahl.audioman.utils.saveSound
 import com.sonnenstahl.audioman.utils.saveSounds
 import java.io.File
 import kotlin.collections.forEach
@@ -70,6 +74,7 @@ fun ShowSounds(sounds: List<Noise>, context: Context) {
                 .padding(12.dp)
                 .combinedClickable {
                     AudioPlayer.playAsset(context, sound)
+                    saveSound(context, sound, CURRENT_SOUND_PATH)
                 }
         ) {
             Row(
@@ -123,6 +128,7 @@ fun ShowCustomSounds(
                     if (sound == AudioPlayer.getSound()) {
                         AudioPlayer.pause()
                         AudioPlayer.clearSound()
+                        saveSound(context, fallBackSound, CURRENT_SOUND_PATH)
                     }
 
                     sounds.remove(sound)
@@ -158,7 +164,10 @@ fun ShowCustomSounds(
                         )
                         .padding(12.dp)
                         .combinedClickable(
-                            onClick = { AudioPlayer.playAsset(context, sound) },
+                            onClick = {
+                                AudioPlayer.playAsset(context, sound)
+                                saveSound(context, sound, CURRENT_SOUND_PATH)
+                            },
                             onLongClick = {
                                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                                     val vibratorManager = context.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as android.os.VibratorManager
