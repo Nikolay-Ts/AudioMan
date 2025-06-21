@@ -50,6 +50,7 @@ import java.io.File
 import kotlin.collections.forEach
 
 @RequiresApi(Build.VERSION_CODES.O)
+@OptIn(ExperimentalMaterialApi::class, ExperimentalFoundationApi::class)
 @Composable
 fun ShowSounds(sounds: List<Noise>, context: Context) {
     LaunchedEffect(Unit) {
@@ -67,7 +68,7 @@ fun ShowSounds(sounds: List<Noise>, context: Context) {
                     shape = RoundedCornerShape(12.dp)
                 )
                 .padding(12.dp)
-                .clickable {
+                .combinedClickable {
                     AudioPlayer.playAsset(context, sound)
                 }
         ) {
