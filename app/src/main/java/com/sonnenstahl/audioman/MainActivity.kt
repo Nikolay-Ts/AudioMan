@@ -1,8 +1,10 @@
 package com.sonnenstahl.audioman
 
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
@@ -17,8 +19,10 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.sonnenstahl.audioman.ui.theme.AudioManTheme
 import com.sonnenstahl.audioman.utils.Router
+import com.sonnenstahl.audioman.utils.Router.CustomNoise
 
 class MainActivity : ComponentActivity() {
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
@@ -35,6 +39,7 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun AppNavigation() {
     val navController = rememberNavController()
@@ -61,7 +66,7 @@ fun AppNavigation() {
         ) {
             composable(Router.Home.route) { HomeScreen(navController) }
             composable(Router.Sounds.route) { Library() }
-            composable(Router.CustomNoise.route) { CustomNoise() }
+            composable(Router.CustomNoise.route) { NoiseGenUI() }
         }
     }
 }

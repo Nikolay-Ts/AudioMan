@@ -14,6 +14,7 @@ import java.io.FileNotFoundException
 
 const val SOUNDS_FILE_PATH: String   = "sounds.json"
 const val CURRENT_SOUND_PATH: String = "current.json"
+const val CUSTOM_SOUND_PATH: String  = "custom.json"
 
 
 // TODO: add all of the serialisation of the data class Sounds
