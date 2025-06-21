@@ -3,14 +3,12 @@ package com.sonnenstahl.audioman
 import android.os.Build
 import android.widget.Toast
 import androidx.annotation.RequiresApi
-import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.sonnenstahl.audioman.utils.AudioPlayer
@@ -18,6 +16,7 @@ import com.sonnenstahl.audioman.utils.CURRENT_SOUND_PATH
 import com.sonnenstahl.audioman.utils.Noise
 import com.sonnenstahl.audioman.utils.generateNoiseSamples
 import com.sonnenstahl.audioman.utils.saveSound
+import com.sonnenstahl.audioman.utils.updateGraphData
 import com.sonnenstahl.audioman.utils.writeWav
 import java.io.File
 
@@ -28,8 +27,8 @@ fun NoiseGenUI() {
     var noiseType by remember { mutableStateOf("White") }
     var amplitude by remember { mutableFloatStateOf(0.5f) }
     var spectrum by remember { mutableFloatStateOf(0.5f) }
-    var previewSamples by remember { mutableStateOf<ByteArray?>(null) }
-
+    val previewSamples = remember { mutableStateOf<ByteArray>(ByteArray(size = 44100 * 2)) }
+    val lineColor = remember { mutableStateOf(Color.White) }
     val context = LocalContext.current
 
     Column(
@@ -38,6 +37,8 @@ fun NoiseGenUI() {
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text("Noise Generator", style = MaterialTheme.typography.headlineMedium)
+
+        FrequencyGraph(samples = previewSamples.value, lineColor = lineColor.value)
 
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text("Noise Type: ")
@@ -48,8 +49,35 @@ fun NoiseGenUI() {
             )
         }
 
-        SliderWithLabel("Amplitude", amplitude, 0f..1f) { amplitude = it }
-        SliderWithLabel("Spectrum (Brightness)", spectrum, 0f..1f) { spectrum = it }
+        SliderWithLabel(
+            "Amplitude", amplitude, 0f..1f,
+            onChange = { amplitude = it },
+            onFinalChange = {
+                updateGraphData(
+                    context,
+                    noiseType,
+                    amplitude,
+                    spectrum,
+                    previewSamples,
+                    lineColor
+                )
+            }
+        )
+        SliderWithLabel(
+            "Spectrum (Brightness)",
+            spectrum, 0f..1f,
+            onChange = {  spectrum = it },
+            onFinalChange = {
+                updateGraphData(
+                    context,
+                    noiseType,
+                    amplitude,
+                    spectrum,
+                    previewSamples,
+                    lineColor
+                )
+            }
+        )
 
         Button(onClick = {
             val file = File(context.cacheDir, "generated_noise.wav")
@@ -57,7 +85,7 @@ fun NoiseGenUI() {
             val durationSec = 1
 
             val samples = generateNoiseSamples(noiseType, amplitude, spectrum, sampleRate, durationSec)
-            previewSamples = samples
+            previewSamples.value = samples
             val path = writeWav(samples, sampleRate, file)
             val sound = Noise(
                 "Generated Noise",
@@ -75,10 +103,21 @@ fun NoiseGenUI() {
 }
 
 @Composable
-fun SliderWithLabel(label: String, value: Float, range: ClosedFloatingPointRange<Float>, onChange: (Float) -> Unit) {
+fun SliderWithLabel(
+    label: String,
+    value: Float,
+    range: ClosedFloatingPointRange<Float>,
+    onChange: (Float) -> Unit,
+    onFinalChange: () -> Unit
+) {
     Column {
         Text("$label: ${"%.2f".format(value)}")
-        Slider(value = value, onValueChange = onChange, valueRange = range)
+        Slider(
+            value = value,
+            onValueChange = onChange,
+            onValueChangeFinished = onFinalChange,
+            valueRange = range
+        )
     }
 }
 

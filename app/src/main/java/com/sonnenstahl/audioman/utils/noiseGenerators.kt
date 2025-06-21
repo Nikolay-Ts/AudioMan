@@ -1,5 +1,14 @@
 package com.sonnenstahl.audioman.utils
 
+import android.R
+import android.content.Context
+import android.os.Build
+import androidx.annotation.RequiresApi
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.snapshots.SnapshotStateList
+import androidx.compose.ui.graphics.Color
+import com.sonnenstahl.audioman.ui.theme.Brown
+import com.sonnenstahl.audioman.ui.theme.Pink40
 import java.io.File
 import java.io.FileOutputStream
 import java.nio.ByteBuffer
@@ -71,4 +80,39 @@ fun createWavHeader(dataLength: Int, sampleRate: Int): ByteArray {
         put("data".toByteArray())
         putInt(dataLength)
     }.array()
+}
+
+
+@RequiresApi(Build.VERSION_CODES.O)
+fun updateGraphData(
+    context: Context,
+    noiseType: String,
+    amplitude: Float,
+    spectrum: Float,
+    samplesState: MutableState<ByteArray>,
+    lineColor: MutableState<Color>
+) {
+    if (!AudioPlayer.isPlaying()) return
+    val file = File(context.cacheDir, "generated_noise.wav")
+    val sampleRate = 44100
+    val durationSec = 1
+
+    samplesState.value = generateNoiseSamples(noiseType, amplitude, spectrum, sampleRate, durationSec)
+
+    val path = writeWav(samplesState.value, sampleRate, file)
+    val sound = Noise(
+        "Generated Noise",
+        "Noise generated via sliders",
+        path
+    )
+
+    lineColor.value = when (noiseType) {
+        "White" -> Color.White
+        "Pink"  -> Pink40
+        "Brown" -> Brown
+        else -> Color.White
+    }
+
+    saveSound(context, sound, CURRENT_SOUND_PATH)
+    AudioPlayer.playAsset(context, sound)
 }

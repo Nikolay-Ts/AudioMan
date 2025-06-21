@@ -10,6 +10,9 @@ import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Pause
@@ -18,6 +21,8 @@ import androidx.compose.material3.Icon
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.unit.dp
 import com.caverock.androidsvg.SVG
@@ -105,6 +110,42 @@ fun AnimatedPause(
         if (tapped) {
             delay(150)
             tapped = false
+        }
+    }
+}
+
+@Composable
+fun FrequencyGraph(
+    samples: ByteArray,
+    lineColor: Color = Color.Companion.Red
+) {
+    val sampleCount = samples.size / 2
+    val points = IntArray(sampleCount) {
+        val low = samples[it * 2].toInt() and 0xFF
+        val high = samples[it * 2 + 1].toInt()
+        (high shl 8) or low
+    }
+
+    val maxVal = points.maxOrNull()?.toFloat()?.coerceAtLeast(1f) ?: 1f
+
+    androidx.compose.foundation.Canvas(
+        modifier = Modifier.Companion
+            .fillMaxWidth()
+            .height(100.dp)
+            .padding(vertical = 8.dp)
+    ) {
+        val step = size.width / sampleCount
+        for (i in 0 until sampleCount - 1) {
+            val x1 = i * step
+            val x2 = (i + 1) * step
+            val y1 = size.height / 2 - (points[i] / maxVal * size.height / 2)
+            val y2 = size.height / 2 - (points[i + 1] / maxVal * size.height / 2)
+            drawLine(
+                color = lineColor,
+                start = Offset(x1, y1),
+                end = Offset(x2, y2),
+                strokeWidth = 1f
+            )
         }
     }
 }
