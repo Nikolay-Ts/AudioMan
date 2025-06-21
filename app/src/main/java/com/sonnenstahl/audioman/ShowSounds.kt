@@ -120,6 +120,11 @@ fun ShowCustomSounds(
         val dismissState = rememberDismissState(
             confirmStateChange = {
                 if (it == DismissValue.DismissedToStart) {
+                    if (sound == AudioPlayer.getSound()) {
+                        AudioPlayer.pause()
+                        AudioPlayer.clearSound()
+                    }
+
                     sounds.remove(sound)
                     count.value++
                     saveSounds(context, sounds, SOUNDS_FILE_PATH)

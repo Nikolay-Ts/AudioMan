@@ -43,17 +43,6 @@ object AudioPlayer {
             play()
         }
 
-
-
-        this.sound = sound
-
-        getPlayer()?.apply {
-            setMediaItem(mediaItem)
-            repeatMode = Player.REPEAT_MODE_ONE
-            prepare()
-            play()
-        }
-
         this.sound = sound
     }
 
@@ -70,4 +59,8 @@ object AudioPlayer {
     }
 
     fun getSound(): Noise = sound ?: fallBackSound
+
+    fun clearSound() {
+        sound = null
+    }
 }
