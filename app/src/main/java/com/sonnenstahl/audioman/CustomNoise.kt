@@ -2,6 +2,8 @@ package com.sonnenstahl.audioman
 
 import android.os.Build
 import androidx.annotation.RequiresApi
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -10,7 +12,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import com.sonnenstahl.audioman.ui.theme.Brown
 import com.sonnenstahl.audioman.ui.theme.LightTeal
+import com.sonnenstahl.audioman.ui.theme.Pink40
 import com.sonnenstahl.audioman.ui.theme.Teal
 import com.sonnenstahl.audioman.utils.AudioPlayer
 import com.sonnenstahl.audioman.utils.CURRENT_SOUND_PATH
@@ -30,7 +34,7 @@ fun CustomNoise() {
     var spectrum by remember { mutableFloatStateOf(0.5f) }
     val isPlaying = remember { mutableStateOf(AudioPlayer.isPlaying()) }
     val previewSamples = remember { mutableStateOf<ByteArray>(ByteArray(size = 44100 * 2)) }
-    val lineColor = remember { mutableStateOf(Color.Red) }
+    val lineColor = remember { mutableStateOf(Color.Red :) }
     val context = LocalContext.current
 
     Column(
@@ -103,48 +107,52 @@ fun CustomNoise() {
                     )
                 }
             )
-            Box(
-                modifier = Modifier
-                    .fillMaxHeight(),
-                contentAlignment = Alignment.Center
+
+            AnimatedPause(
+                isPlaying.value,
+                200
             ) {
-                AnimatedPause(isPlaying.value) {
-                when (isPlaying.value) {
-                    true -> {
-                        AudioPlayer.pause()
-                        isPlaying.value = false
+            when (isPlaying.value) {
+                true -> {
+                    AudioPlayer.pause()
+                    isPlaying.value = false
+                }
+
+                false -> {
+                    lineColor.value = when (noiseType) {
+                        "White" -> Color.Gray
+                        "Pink"  -> Pink40
+                        "Brown" -> Brown
+                        else -> Color.White
                     }
+                    val file = File(context.cacheDir, "generated_noise.wav")
+                    val sampleRate = 44100
+                    val durationSec = 1
 
-                    false -> {
-                        val file = File(context.cacheDir, "generated_noise.wav")
-                        val sampleRate = 44100
-                        val durationSec = 1
-
-                        val samples =
-                            generateNoiseSamples(
-                                noiseType,
-                                amplitude,
-                                spectrum,
-                                sampleRate,
-                                durationSec
-                            )
-                        previewSamples.value = samples
-                        val path = writeWav(samples, sampleRate, file)
-                        val sound = Noise(
-                            "Generated Noise",
-                            "Noise generated via sliders",
-                            path
+                    val samples =
+                        generateNoiseSamples(
+                            noiseType,
+                            amplitude,
+                            spectrum,
+                            sampleRate,
+                            durationSec
                         )
-                        saveSound(context, sound, CURRENT_SOUND_PATH)
+                    previewSamples.value = samples
+                    val path = writeWav(samples, sampleRate, file)
+                    val sound = Noise(
+                        "Generated Noise",
+                        "Noise generated via sliders",
+                        path
+                    )
+                    saveSound(context, sound, CURRENT_SOUND_PATH)
 
-                        AudioPlayer.playAsset(context, sound)
+                    AudioPlayer.playAsset(context, sound)
 
-                        AudioPlayer.play()
-                        isPlaying.value = true
-                    }
+                    AudioPlayer.play()
+                    isPlaying.value = true
                 }
             }
-            }
+        }
         }
     }
 }
@@ -157,7 +165,7 @@ fun SliderWithLabel(
     onChange: (Float) -> Unit,
     onFinalChange: () -> Unit
 ) {
-    Column(modifier = Modifier.padding(15.dp)) {
+    Column(modifier = Modifier.padding(top=10.dp)) {
         Text(
             "$label: ${"%.2f".format(value)}",
             modifier = Modifier
@@ -180,7 +188,11 @@ fun SliderWithLabel(
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun DropdownMenuBox(options: List<String>, selected: String, onSelectedChange: (String) -> Unit) {
+fun DropdownMenuBox(
+    options: List<String>,
+    selected: String,
+    onSelectedChange: (String) -> Unit
+) {
     var expanded by remember { mutableStateOf(false) }
 
     Box {

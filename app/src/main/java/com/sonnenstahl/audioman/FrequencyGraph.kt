@@ -1,6 +1,6 @@
 package com.sonnenstahl.audioman
 
-import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
@@ -26,9 +26,9 @@ fun FrequencyGraph(
 
     val maxVal = points.maxOrNull()?.toFloat()?.coerceAtLeast(1f) ?: 1f
     val configuration = LocalConfiguration.current
-    val plotSize = configuration.screenWidthDp * 0.75
+    val plotSize = configuration.screenWidthDp * 0.75f
 
-    androidx.compose.foundation.Canvas(
+    Canvas(
         modifier = Modifier
             .height(plotSize.dp)
             .width(plotSize.dp)
@@ -38,12 +38,12 @@ fun FrequencyGraph(
         val horizontalLines = 4
         val verticalLines = 8
 
-        // Background
+        // background
         drawRect(color = Color(0xFFF8F8F8)) // Light gray/white
 
-        // Horizontal grid lines
+        // horizontal grid lines
         for (i in 0..horizontalLines) {
-            val y = i * size.width / horizontalLines
+            val y = i * size.height / horizontalLines
             drawLine(
                 color = Color.LightGray,
                 start = Offset(0f, y),
@@ -52,23 +52,25 @@ fun FrequencyGraph(
             )
         }
 
-        // Vertical grid lines
+        // vertical grid lines
         for (i in 0..verticalLines) {
             val x = i * size.width / verticalLines
             drawLine(
                 color = Color.LightGray,
                 start = Offset(x, 0f),
-                end = Offset(x, size.width),
+                end = Offset(x, size.height),
                 strokeWidth = 0.5f
             )
         }
 
-        // Data Line
+        // Waveform line
         for (i in 0 until sampleCount - 1) {
             val x1 = i * step
             val x2 = (i + 1) * step
-            val y1 = size.width / 2 - (points[i] / maxVal * size.width / 2)
-            val y2 = size.width / 2 - (points[i + 1] / maxVal * size.width / 2)
+
+            val y1 = size.height / 2 - (points[i] / maxVal * size.height / 2)
+            val y2 = size.height / 2 - (points[i + 1] / maxVal * size.height / 2)
+
             drawLine(
                 color = lineColor.value,
                 start = Offset(x1, y1),
