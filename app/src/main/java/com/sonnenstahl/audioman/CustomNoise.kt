@@ -2,8 +2,6 @@ package com.sonnenstahl.audioman
 
 import android.os.Build
 import androidx.annotation.RequiresApi
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -18,8 +16,12 @@ import com.sonnenstahl.audioman.ui.theme.Pink40
 import com.sonnenstahl.audioman.ui.theme.Teal
 import com.sonnenstahl.audioman.utils.AudioPlayer
 import com.sonnenstahl.audioman.utils.CURRENT_SOUND_PATH
+import com.sonnenstahl.audioman.utils.CUSTOM_SOUND_PATH
+import com.sonnenstahl.audioman.utils.CustomNoise
 import com.sonnenstahl.audioman.utils.Noise
 import com.sonnenstahl.audioman.utils.generateNoiseSamples
+import com.sonnenstahl.audioman.utils.loadCustomSound
+import com.sonnenstahl.audioman.utils.saveCustomSound
 import com.sonnenstahl.audioman.utils.saveSound
 import com.sonnenstahl.audioman.utils.updateGraphData
 import com.sonnenstahl.audioman.utils.writeWav
@@ -30,14 +32,17 @@ import java.io.File
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun CustomNoise() {
-    var noiseType by remember { mutableStateOf("White") }
-    var amplitude by remember { mutableFloatStateOf(0.5f) }
-    var spectrum by remember { mutableFloatStateOf(0.5f) }
-    val isPlaying = remember { mutableStateOf(AudioPlayer.isPlaying()) }
-    val previewSamples = remember { mutableStateOf<ByteArray>(ByteArray(size = 44100 * 2)) }
-    val lineColor = remember { mutableStateOf(Color.Red) }
     val context = LocalContext.current
 
+    var customNoise by remember { mutableStateOf(loadCustomSound(context, CUSTOM_SOUND_PATH)) }
+    var noiseType by remember { mutableStateOf(customNoise?.noiseType ?: "White") }
+    var amplitude by remember { mutableFloatStateOf(customNoise?.amplitude ?: 0.5f) }
+    var spectrum by remember { mutableFloatStateOf(customNoise?.spectrum ?: 0.5f) }
+    val isPlaying = remember { mutableStateOf(AudioPlayer.isPlaying()) }
+    val previewSamples = remember {
+        mutableStateOf<ByteArray>(ByteArray(size = 44100 * 2))
+    }
+    val lineColor = remember { mutableStateOf(Color.Red) }
     val coroutineScope = rememberCoroutineScope()
 
 
@@ -142,13 +147,24 @@ fun CustomNoise() {
                                 sampleRate,
                                 durationSec
                             )
+
                         previewSamples.value = samples
+
                         val path = writeWav(samples, sampleRate, file)
+
                         val sound = Noise(
                             "Generated Noise",
                             "Noise generated via sliders",
                             path
                         )
+
+                        val customNoise = CustomNoise(
+                            noiseType,
+                            amplitude,
+                            spectrum,
+                        )
+
+                        saveCustomSound(context, customNoise, CUSTOM_SOUND_PATH)
                         saveSound(context, sound, CURRENT_SOUND_PATH)
                         AudioPlayer.playAsset(context, sound)
                     }

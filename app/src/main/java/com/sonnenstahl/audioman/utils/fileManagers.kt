@@ -97,6 +97,36 @@ fun loadSound(context: Context, filepath: String): Noise? {
     }
 }
 
+fun saveCustomSound(
+    context: Context,
+    sounds: CustomNoise,
+    filepath: String
+) {
+    try {
+        val json = Json.encodeToString(sounds)
+        val file = File(context.filesDir, filepath)
+        file.writeText(json)
+    } catch (e: Exception) {
+        Log.d("MEOW", e.toString())
+    }
+}
+
+fun loadCustomSound(context: Context, filepath: String): CustomNoise? {
+    val file = File(context.filesDir, filepath)
+    return try {
+        val jsonString = file.readText()
+        Json.decodeFromString<CustomNoise>(jsonString)
+
+    } catch (e: FileNotFoundException) {
+        null
+    }
+}
+
+
+
+/**
+ * for debugging purposes
+ */
 fun deleteSoundsFile(context: Context, filepath: String = SOUNDS_FILE_PATH): Boolean {
     val file = File(context.filesDir, filepath)
     return if (file.exists()) {

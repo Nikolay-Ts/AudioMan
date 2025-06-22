@@ -114,7 +114,13 @@ fun updateGraphData(
         audioPath,
     )
 
+    val customNoise = CustomNoise(
+        noiseType,
+        amplitude,
+        spectrum,
+    )
 
+    saveCustomSound(context, customNoise, CUSTOM_SOUND_PATH)
     saveSound(context, sound, CURRENT_SOUND_PATH)
     AudioPlayer.playAsset(context, sound)
 }
