@@ -23,6 +23,7 @@ import com.sonnenstahl.audioman.utils.generateNoiseSamples
 import com.sonnenstahl.audioman.utils.saveSound
 import com.sonnenstahl.audioman.utils.updateGraphData
 import com.sonnenstahl.audioman.utils.writeWav
+import kotlinx.coroutines.launch
 import java.io.File
 
 
@@ -34,11 +35,14 @@ fun CustomNoise() {
     var spectrum by remember { mutableFloatStateOf(0.5f) }
     val isPlaying = remember { mutableStateOf(AudioPlayer.isPlaying()) }
     val previewSamples = remember { mutableStateOf<ByteArray>(ByteArray(size = 44100 * 2)) }
-    val lineColor = remember { mutableStateOf(Color.Red :) }
+    val lineColor = remember { mutableStateOf(Color.Red) }
     val context = LocalContext.current
 
+    val coroutineScope = rememberCoroutineScope()
+
+
     Column(
-        modifier = Modifier.fillMaxSize().padding(24.dp),
+        modifier = Modifier.fillMaxSize().padding(24.dp).padding(top=5.dp),
         verticalArrangement = Arrangement.spacedBy(32.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -47,7 +51,7 @@ fun CustomNoise() {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(24.dp)
+                .padding(15.dp)
                 .padding(vertical = 14.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
@@ -119,35 +123,35 @@ fun CustomNoise() {
                 }
 
                 false -> {
-                    lineColor.value = when (noiseType) {
-                        "White" -> Color.Gray
-                        "Pink"  -> Pink40
-                        "Brown" -> Brown
-                        else -> Color.White
-                    }
-                    val file = File(context.cacheDir, "generated_noise.wav")
-                    val sampleRate = 44100
-                    val durationSec = 1
+                    coroutineScope.launch {
+                        lineColor.value = when (noiseType) {
+                            "White" -> Color.Gray
+                            "Pink"  -> Pink40
+                            "Brown" -> Brown
+                            else -> Color.White
+                        }
+                        val file = File(context.cacheDir, "generated_noise.wav")
+                        val sampleRate = 44100
+                        val durationSec = 1
 
-                    val samples =
-                        generateNoiseSamples(
-                            noiseType,
-                            amplitude,
-                            spectrum,
-                            sampleRate,
-                            durationSec
+                        val samples =
+                            generateNoiseSamples(
+                                noiseType,
+                                amplitude,
+                                spectrum,
+                                sampleRate,
+                                durationSec
+                            )
+                        previewSamples.value = samples
+                        val path = writeWav(samples, sampleRate, file)
+                        val sound = Noise(
+                            "Generated Noise",
+                            "Noise generated via sliders",
+                            path
                         )
-                    previewSamples.value = samples
-                    val path = writeWav(samples, sampleRate, file)
-                    val sound = Noise(
-                        "Generated Noise",
-                        "Noise generated via sliders",
-                        path
-                    )
-                    saveSound(context, sound, CURRENT_SOUND_PATH)
-
-                    AudioPlayer.playAsset(context, sound)
-
+                        saveSound(context, sound, CURRENT_SOUND_PATH)
+                        AudioPlayer.playAsset(context, sound)
+                    }
                     AudioPlayer.play()
                     isPlaying.value = true
                 }
@@ -165,7 +169,7 @@ fun SliderWithLabel(
     onChange: (Float) -> Unit,
     onFinalChange: () -> Unit
 ) {
-    Column(modifier = Modifier.padding(top=10.dp)) {
+    Column(modifier = Modifier.padding(top=10.dp).padding(bottom = 5.dp)) {
         Text(
             "$label: ${"%.2f".format(value)}",
             modifier = Modifier
@@ -175,7 +179,7 @@ fun SliderWithLabel(
         Slider(
             value = value,
             onValueChange = onChange,
-            onValueChangeFinished = onFinalChange,
+            onValueChangeFinished =  onFinalChange,
             valueRange = range,
             colors = SliderDefaults.colors(
                 thumbColor = Teal,
@@ -199,7 +203,7 @@ fun DropdownMenuBox(
         Button(
             colors =  ButtonDefaults.buttonColors(Teal),
             onClick = { expanded = true }) {
-            Text(selected)
+            Text(selected, color = Color.White)
         }
         DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
             options.forEach {
