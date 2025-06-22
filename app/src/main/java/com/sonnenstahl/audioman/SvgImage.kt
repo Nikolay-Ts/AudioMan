@@ -11,6 +11,7 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -111,11 +112,15 @@ fun AnimatedPause(
             targetState = isPlaying,
             label = "IconCrossfade"
         ) { playing ->
+            val color = when (isSystemInDarkTheme()) {
+                true ->  Color.White
+                false -> Color.Black
+            }
             Icon(
                 imageVector = if (playing) Icons.Filled.Pause else Icons.Filled.PlayArrow,
                 contentDescription = if (playing) "Pause" else "Play",
                 modifier = Modifier.fillMaxSize(),
-                tint = Color.White
+                tint = color
             )
         }
     }

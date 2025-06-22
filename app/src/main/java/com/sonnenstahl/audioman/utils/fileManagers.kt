@@ -113,16 +113,20 @@ fun saveCustomSound(
 
 fun loadCustomSound(context: Context, filepath: String): CustomNoise? {
     val file = File(context.filesDir, filepath)
-    return try {
-        val jsonString = file.readText()
-        Json.decodeFromString<CustomNoise>(jsonString)
+    if (!file.exists()) return null
 
-    } catch (e: FileNotFoundException) {
+    return try {
+        val json = Json {
+            ignoreUnknownKeys = true
+            isLenient = true
+        }
+        val content = file.readText()
+        json.decodeFromString<CustomNoise>(content)
+    } catch (e: Exception) {
+        e.printStackTrace()
         null
     }
 }
-
-
 
 /**
  * for debugging purposes

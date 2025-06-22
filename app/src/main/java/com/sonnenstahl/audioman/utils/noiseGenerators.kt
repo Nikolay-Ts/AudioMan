@@ -118,6 +118,7 @@ fun updateGraphData(
         noiseType,
         amplitude,
         spectrum,
+        samplesState.value
     )
 
     saveCustomSound(context, customNoise, CUSTOM_SOUND_PATH)

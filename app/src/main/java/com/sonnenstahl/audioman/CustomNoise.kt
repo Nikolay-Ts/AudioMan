@@ -40,11 +40,21 @@ fun CustomNoise() {
     var spectrum by remember { mutableFloatStateOf(customNoise?.spectrum ?: 0.5f) }
     val isPlaying = remember { mutableStateOf(AudioPlayer.isPlaying()) }
     val previewSamples = remember {
-        mutableStateOf<ByteArray>(ByteArray(size = 44100 * 2))
+        mutableStateOf<ByteArray>(customNoise?.samples ?: ByteArray(size = 44100 * 2))
     }
     val lineColor = remember { mutableStateOf(Color.Red) }
     val coroutineScope = rememberCoroutineScope()
 
+    LaunchedEffect(Unit) {
+        customNoise?.let {
+            lineColor.value = when (noiseType) {
+                "White" -> Color.Gray
+                "Pink"  -> Pink40
+                "Brown" -> Brown
+                else -> Color.White
+            }
+        }
+    }
 
     Column(
         modifier = Modifier.fillMaxSize().padding(24.dp).padding(top=5.dp),
@@ -162,6 +172,7 @@ fun CustomNoise() {
                             noiseType,
                             amplitude,
                             spectrum,
+                            samples
                         )
 
                         saveCustomSound(context, customNoise, CUSTOM_SOUND_PATH)

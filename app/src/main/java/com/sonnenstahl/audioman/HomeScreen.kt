@@ -37,6 +37,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.foundation.border
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material3.MaterialTheme
@@ -90,7 +91,17 @@ fun HomeScreen(navController: NavController) {
             )
         }
 
-        if (currentlyPLaying.value.imagePath.substringAfter(".", "") == "svg") {
+        if (currentlyPLaying.value.imagePath == "default.svg") {
+            val imagePath = when (isSystemInDarkTheme()) {
+                true -> "default-white.svg"
+                false -> "default.svg"
+            }
+            SvgImageFromAssets(
+                imagePath,
+                modifier = Modifier.size(imageSize)
+            )
+        }
+        else if (currentlyPLaying.value.imagePath.substringAfter(".", "") == "svg") {
             SvgImageFromAssets(
                 currentlyPLaying.value.imagePath,
                 modifier = Modifier.size(imageSize)
