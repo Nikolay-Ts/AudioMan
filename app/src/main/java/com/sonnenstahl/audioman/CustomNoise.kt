@@ -1,8 +1,6 @@
 package com.sonnenstahl.audioman
 
 import android.os.Build
-import android.widget.Toast
-import androidx.annotation.ColorRes
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
@@ -11,14 +9,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.unit.dp
 import com.sonnenstahl.audioman.ui.theme.LightTeal
 import com.sonnenstahl.audioman.ui.theme.Teal
 import com.sonnenstahl.audioman.utils.AudioPlayer
 import com.sonnenstahl.audioman.utils.CURRENT_SOUND_PATH
 import com.sonnenstahl.audioman.utils.Noise
-import com.sonnenstahl.audioman.utils.defaultSounds
 import com.sonnenstahl.audioman.utils.generateNoiseSamples
 import com.sonnenstahl.audioman.utils.saveSound
 import com.sonnenstahl.audioman.utils.updateGraphData
@@ -28,12 +24,13 @@ import java.io.File
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun NoiseGenUI() {
+fun CustomNoise() {
     var noiseType by remember { mutableStateOf("White") }
     var amplitude by remember { mutableFloatStateOf(0.5f) }
     var spectrum by remember { mutableFloatStateOf(0.5f) }
+    val isPlaying = remember { mutableStateOf(AudioPlayer.isPlaying()) }
     val previewSamples = remember { mutableStateOf<ByteArray>(ByteArray(size = 44100 * 2)) }
-    val lineColor = remember { mutableStateOf(Color.White) }
+    val lineColor = remember { mutableStateOf(Color.Red) }
     val context = LocalContext.current
 
     Column(
@@ -52,11 +49,13 @@ fun NoiseGenUI() {
         ) {
             Spacer(modifier = Modifier.weight(1f))
 
-            FrequencyGraph(samples = previewSamples.value, lineColor = lineColor.value)
+            FrequencyGraph(samples = previewSamples.value, lineColor = lineColor)
             Spacer(modifier = Modifier.weight(1f))
 
-
-            Row(verticalAlignment = Alignment.CenterVertically) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.padding(top = 10.dp)
+            ) {
                 Text("Noise Type: ")
                 DropdownMenuBox(
                     options = listOf("White", "Pink", "Brown"),
@@ -90,7 +89,7 @@ fun NoiseGenUI() {
                 }
             )
             SliderWithLabel(
-                "Spectrum (Brightness)",
+                "Brightness",
                 spectrum, 0f..1f,
                 onChange = { spectrum = it },
                 onFinalChange = {
@@ -104,29 +103,47 @@ fun NoiseGenUI() {
                     )
                 }
             )
+            Box(
+                modifier = Modifier
+                    .fillMaxHeight(),
+                contentAlignment = Alignment.Center
+            ) {
+                AnimatedPause(isPlaying.value) {
+                when (isPlaying.value) {
+                    true -> {
+                        AudioPlayer.pause()
+                        isPlaying.value = false
+                    }
 
-            Button(
-                colors =  ButtonDefaults.buttonColors(Teal),
-                onClick = {
-                val file = File(context.cacheDir, "generated_noise.wav")
-                val sampleRate = 44100
-                val durationSec = 1
+                    false -> {
+                        val file = File(context.cacheDir, "generated_noise.wav")
+                        val sampleRate = 44100
+                        val durationSec = 1
 
-                val samples =
-                    generateNoiseSamples(noiseType, amplitude, spectrum, sampleRate, durationSec)
-                previewSamples.value = samples
-                val path = writeWav(samples, sampleRate, file)
-                val sound = Noise(
-                    "Generated Noise",
-                    "Noise generated via sliders",
-                    path
-                )
-                saveSound(context, sound, CURRENT_SOUND_PATH)
+                        val samples =
+                            generateNoiseSamples(
+                                noiseType,
+                                amplitude,
+                                spectrum,
+                                sampleRate,
+                                durationSec
+                            )
+                        previewSamples.value = samples
+                        val path = writeWav(samples, sampleRate, file)
+                        val sound = Noise(
+                            "Generated Noise",
+                            "Noise generated via sliders",
+                            path
+                        )
+                        saveSound(context, sound, CURRENT_SOUND_PATH)
 
-                AudioPlayer.playAsset(context, sound)
-                Toast.makeText(context, "Saved to: $path", Toast.LENGTH_LONG).show()
-            }) {
-                Text("Play")
+                        AudioPlayer.playAsset(context, sound)
+
+                        AudioPlayer.play()
+                        isPlaying.value = true
+                    }
+                }
+            }
             }
         }
     }
@@ -141,7 +158,12 @@ fun SliderWithLabel(
     onFinalChange: () -> Unit
 ) {
     Column(modifier = Modifier.padding(15.dp)) {
-        Text("$label: ${"%.2f".format(value)}")
+        Text(
+            "$label: ${"%.2f".format(value)}",
+            modifier = Modifier
+                .align(Alignment.CenterHorizontally)
+                .padding(bottom = 5.dp)
+        )
         Slider(
             value = value,
             onValueChange = onChange,

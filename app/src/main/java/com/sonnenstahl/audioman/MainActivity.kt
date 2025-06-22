@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
@@ -19,7 +18,6 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.sonnenstahl.audioman.ui.theme.AudioManTheme
 import com.sonnenstahl.audioman.utils.Router
-import com.sonnenstahl.audioman.utils.Router.CustomNoise
 
 class MainActivity : ComponentActivity() {
     @RequiresApi(Build.VERSION_CODES.O)
@@ -66,7 +64,7 @@ fun AppNavigation() {
         ) {
             composable(Router.Home.route) { HomeScreen(navController) }
             composable(Router.Sounds.route) { Library() }
-            composable(Router.CustomNoise.route) { NoiseGenUI() }
+            composable(Router.CustomNoise.route) { CustomNoise() }
         }
     }
 }

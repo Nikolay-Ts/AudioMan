@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
@@ -14,7 +15,7 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun FrequencyGraph(
     samples: ByteArray,
-    lineColor: Color = Color.Red
+    lineColor: MutableState<Color>
 ) {
     val sampleCount = samples.size / 2
     val points = IntArray(sampleCount) {
@@ -31,8 +32,7 @@ fun FrequencyGraph(
         modifier = Modifier
             .height(plotSize.dp)
             .width(plotSize.dp)
-            .padding(vertical = 8.dp)
-
+            .padding(bottom = 8.dp)
     ) {
         val step = size.width / sampleCount
         val horizontalLines = 4
@@ -43,7 +43,7 @@ fun FrequencyGraph(
 
         // Horizontal grid lines
         for (i in 0..horizontalLines) {
-            val y = i * size.height / horizontalLines
+            val y = i * size.width / horizontalLines
             drawLine(
                 color = Color.LightGray,
                 start = Offset(0f, y),
@@ -58,7 +58,7 @@ fun FrequencyGraph(
             drawLine(
                 color = Color.LightGray,
                 start = Offset(x, 0f),
-                end = Offset(x, size.height),
+                end = Offset(x, size.width),
                 strokeWidth = 0.5f
             )
         }
@@ -67,10 +67,10 @@ fun FrequencyGraph(
         for (i in 0 until sampleCount - 1) {
             val x1 = i * step
             val x2 = (i + 1) * step
-            val y1 = size.height / 2 - (points[i] / maxVal * size.height / 2)
-            val y2 = size.height / 2 - (points[i + 1] / maxVal * size.height / 2)
+            val y1 = size.width / 2 - (points[i] / maxVal * size.width / 2)
+            val y2 = size.width / 2 - (points[i + 1] / maxVal * size.width / 2)
             drawLine(
-                color = lineColor,
+                color = lineColor.value,
                 start = Offset(x1, y1),
                 end = Offset(x2, y2),
                 strokeWidth = 1.5f
