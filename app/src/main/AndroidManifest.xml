@@ -2,12 +2,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <!-- REQUIRED for Android 14+ -->
+    <!-- Permissions -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
-
-    <!-- Still needed for Android 9–13 -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
-
     <uses-permission android:name="android.permission.VIBRATE" />
 
     <application
@@ -21,6 +18,20 @@
         android:theme="@style/Theme.AudioMan"
         tools:targetApi="31">
 
+        <!-- Glance App Widget Receiver -->
+        <receiver
+            android:name=".AudioManWidget"
+            android:exported="true"
+            tools:ignore="Instantiatable">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/audio_man_widget_info" />
+        </receiver>
+
+        <!-- Main app launcher -->
         <activity
             android:name=".MainActivity"
             android:exported="true"
@@ -31,15 +42,24 @@
             </intent-filter>
         </activity>
 
-        <!-- MediaSessionService registration -->
+        <!-- Media Playback Service -->
         <service
             android:name=".utils.AudioService"
-            android:foregroundServiceType="mediaPlayback"
-            android:exported="true">
+            android:exported="true"
+            android:foregroundServiceType="mediaPlayback">
             <intent-filter>
-                <action android:name="androidx.media3.session.MediaSessionService"/>
+                <action android:name="androidx.media3.session.MediaSessionService" />
             </intent-filter>
         </service>
 
+        <receiver android:name=".MediaWidgetReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE"/>
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/audio_man_widget_info"/>
+        </receiver>
     </application>
 </manifest>
