@@ -31,6 +31,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -108,8 +110,10 @@ fun ShowSounds(sounds: List<Noise>, context: Context) {
 @Composable
 fun ShowCustomSounds(
     sounds: SnapshotStateList<Noise>,
+    currentSound: MutableState<Noise?>,
     count: MutableState<Int>,
     popUpDialog: MutableState<Boolean>,
+    openDialogTrigger: MutableState<Boolean>,
     context: Context
 ) {
     LaunchedEffect(Unit) {
@@ -129,18 +133,15 @@ fun ShowCustomSounds(
                     sounds.remove(sound)
                     count.value++
                     saveSounds(context, sounds, SOUNDS_FILE_PATH)
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                        val vibratorManager = context.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as android.os.VibratorManager
-                        val vibrator = vibratorManager.defaultVibrator
-                        vibrator.vibrate(VibrationEffect.createOneShot(300, VibrationEffect.DEFAULT_AMPLITUDE))
+
+                    val vibrator = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                        (context.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as android.os.VibratorManager).defaultVibrator
                     } else {
-                        val vibrator = context.getSystemService(Context.VIBRATOR_SERVICE) as android.os.Vibrator
-                        vibrator.vibrate(300)
+                        context.getSystemService(Context.VIBRATOR_SERVICE) as android.os.Vibrator
                     }
+                    vibrator.vibrate(VibrationEffect.createOneShot(300, VibrationEffect.DEFAULT_AMPLITUDE))
                     true
-                } else {
-                    false
-                }
+                } else false
             }
         )
 
@@ -164,15 +165,15 @@ fun ShowCustomSounds(
                                 saveSound(context, sound, CURRENT_SOUND_PATH)
                             },
                             onLongClick = {
-                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                                    val vibratorManager = context.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as android.os.VibratorManager
-                                    val vibrator = vibratorManager.defaultVibrator
-                                    vibrator.vibrate(VibrationEffect.createOneShot(150, VibrationEffect.DEFAULT_AMPLITUDE))
+                                val vibrator = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                                    (context.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as android.os.VibratorManager).defaultVibrator
                                 } else {
-                                    val vibrator = context.getSystemService(Context.VIBRATOR_SERVICE) as android.os.Vibrator
-                                    vibrator.vibrate(150)
+                                    context.getSystemService(Context.VIBRATOR_SERVICE) as android.os.Vibrator
                                 }
-                                popUpDialog.value = true
+                                vibrator.vibrate(VibrationEffect.createOneShot(150, VibrationEffect.DEFAULT_AMPLITUDE))
+
+                                currentSound.value = sound
+                                openDialogTrigger.value = true
                             }
                         )
                 ) {
@@ -224,5 +225,4 @@ fun ShowCustomSounds(
             }
         )
     }
-
 }

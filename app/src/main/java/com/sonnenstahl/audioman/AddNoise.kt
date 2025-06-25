@@ -1,75 +1,52 @@
 package com.sonnenstahl.audioman
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Dialog
-import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.runtime.snapshots.SnapshotStateList
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
+import androidx.core.net.toUri
 import coil.compose.rememberAsyncImagePainter
 import com.sonnenstahl.audioman.ui.theme.Teal
-import com.sonnenstahl.audioman.utils.DEFAULT_AUDIO_URI
-import com.sonnenstahl.audioman.utils.DEFAULT_IMAGE_URI
-import com.sonnenstahl.audioman.utils.SOUNDS_FILE_PATH
-import com.sonnenstahl.audioman.utils.Noise
-import com.sonnenstahl.audioman.utils.ValidNoise
-import com.sonnenstahl.audioman.utils.saveSounds
-import com.sonnenstahl.audioman.utils.saveUri
-import com.sonnenstahl.audioman.utils.validateNoise
+import com.sonnenstahl.audioman.utils.*
 
-// TODO: Validation function and highlight in red what is not good
 @Composable
 fun AddNoise(
     showDialog: Boolean,
     soundsList: SnapshotStateList<Noise>,
+    currentSound: Noise?,
     onDismiss: () -> Unit,
 ) {
     val context = LocalContext.current
     val keyboard = LocalSoftwareKeyboardController.current
-    val title = remember { mutableStateOf("") }
-    val supportTitle = remember { mutableStateOf("") } // for when the user gets it wrong
+
+    val title = remember { mutableStateOf(currentSound?.title ?: "") }
+    val description = remember { mutableStateOf(currentSound?.description ?: "") }
+    val audioUri = remember { mutableStateOf(currentSound?.audioPath?.toUri()) }
+    val imageUri = remember { mutableStateOf(currentSound?.imagePath?.toUri()) }
+
+    val supportTitle = remember { mutableStateOf("") }
+    val supportAudio = remember { mutableStateOf("") }
     val notUnique = remember { mutableStateOf(false) }
-    val description = remember { mutableStateOf("") }
-    val audioUri = remember { mutableStateOf<Uri?>(null) }
-    val supportaudio = remember { mutableStateOf("") } // for when the user gets it wrong
+    val validNoise = remember { mutableStateOf(ValidNoise()) }
+
     val audioPickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
-    ) { uri ->
-        audioUri.value = uri
-    }
-    val imageUri = remember { mutableStateOf<Uri?>(null) }
+    ) { uri -> audioUri.value = uri }
 
     val imagePickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
-    ) { uri: Uri? ->
-        imageUri.value = uri
-    }
-
-    val validNoise = remember { mutableStateOf(ValidNoise()) }
+    ) { uri -> imageUri.value = uri }
 
     if (showDialog) {
         Dialog(onDismissRequest = onDismiss) {
@@ -81,102 +58,77 @@ fun AddNoise(
                 shape = RoundedCornerShape(16.dp)
             ) {
                 Column(
-                    modifier = Modifier
-                        .fillMaxSize(),
+                    modifier = Modifier.fillMaxSize(),
                     verticalArrangement = Arrangement.SpaceBetween,
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
                         "Add a new Track!",
                         style = MaterialTheme.typography.headlineSmall,
-                        modifier = Modifier
-                            .padding(top = 25.dp)
-                            .align(Alignment.CenterHorizontally)
+                        modifier = Modifier.padding(top = 25.dp)
                     )
-                    Column(
-                        modifier = Modifier
-                            .padding(horizontal = 16.dp)
-                            .fillMaxWidth()
-                    ) {
+
+                    Column(Modifier.padding(horizontal = 16.dp).fillMaxWidth()) {
                         TextField(
                             value = title.value,
-                            colors = TextFieldDefaults.colors(
-                                unfocusedLabelColor = Color.White,
-                                focusedTextColor = Color.White,
-                            ),
                             onValueChange = {
                                 title.value = it
                                 if (!validNoise.value.title) {
                                     validNoise.value.title =
-                                        soundsList.any { it.title == title.value }
+                                        soundsList.any { sound -> sound.title == title.value }
                                 }
-                                },
-                            modifier = Modifier.fillMaxWidth(),
-                            label = {
-                                Text(
-                                    "Title",
-                                    modifier = Modifier.padding(start = 4.dp)
-                                )
                             },
-                            placeholder = {
-                                Text(
-                                    "Title of your own Noise",
-                                    modifier = Modifier.padding(start = 4.dp)
-
-                                )
-                            },
-                            isError = ! validNoise.value.title,
-                            singleLine = true
+                            label = { Text("Title") },
+                            placeholder = { Text("Title of your own Noise") },
+                            isError = !validNoise.value.title,
+                            singleLine = true,
+                            colors = TextFieldDefaults.colors(
+                                unfocusedLabelColor = Color.White,
+                                focusedTextColor = Color.White,
+                            ),
+                            modifier = Modifier.fillMaxWidth()
                         )
                         Text(
                             text = supportTitle.value,
                             color = Color.Red,
-                            modifier = Modifier
-                                .padding(top = 4.dp)
-                                .align(Alignment.Start)
+                            modifier = Modifier.padding(top = 4.dp)
                         )
                     }
 
                     TextField(
                         value = description.value,
-                        colors = TextFieldDefaults.colors(
-                                unfocusedLabelColor = Color.White,
-                                focusedTextColor = Color.White,
-                            ),
                         onValueChange = { description.value = it },
-                        modifier = Modifier
-                            .padding(horizontal = 16.dp)
-                            .padding(top=16.dp)
-                            .fillMaxWidth(),
                         label = { Text("Description") },
                         placeholder = { Text("What makes your Noise special") },
-                        singleLine = false
+                        singleLine = false,
+                        modifier = Modifier
+                            .padding(horizontal = 16.dp, vertical = 8.dp)
+                            .fillMaxWidth(),
+                        colors = TextFieldDefaults.colors(
+                            unfocusedLabelColor = Color.White,
+                            focusedTextColor = Color.White,
+                        )
                     )
 
-                    Column(
-                        modifier = Modifier
-                            .padding(horizontal = 16.dp)
-                            .fillMaxWidth()
-                    ) {
+                    Column(Modifier.padding(horizontal = 16.dp).fillMaxWidth()) {
                         OutlinedButton(
                             onClick = {
                                 keyboard?.hide()
                                 audioPickerLauncher.launch("audio/*")
-                              },
+                            },
                             modifier = Modifier.fillMaxWidth()
                         ) {
-                            Text(if (audioUri.value != null)
-                                "Selected: ${audioUri.value?.lastPathSegment}"
-                            else
-                                "Track",
-                                color = Color.White)
+                            Text(
+                                if (audioUri.value != null)
+                                    "Selected: ${audioUri.value?.lastPathSegment}"
+                                else "Track",
+                                color = Color.White
+                            )
                         }
                         Text(
-                            text = supportaudio.value,
+                            text = supportAudio.value,
                             color = Color.Red,
-                            modifier = Modifier
-                                .padding(start = 16.dp, top = 4.dp)
-                                .align(Alignment.Start)
+                            modifier = Modifier.padding(start = 16.dp, top = 4.dp)
                         )
                     }
 
@@ -184,25 +136,23 @@ fun AddNoise(
                         onClick = {
                             keyboard?.hide()
                             imagePickerLauncher.launch("image/*")
-                          },
+                        },
                         modifier = Modifier
                             .padding(horizontal = 16.dp)
                             .fillMaxWidth()
                     ) {
-                        Text(if (imageUri.value != null)
-                            "Selected Image: ${imageUri.value?.lastPathSegment}"
-                        else
-                            "Cover",
-                            color = Color.White)
+                        Text(
+                            if (imageUri.value != null)
+                                "Selected Image: ${imageUri.value?.lastPathSegment}"
+                            else "Cover",
+                            color = Color.White
+                        )
                     }
 
                     imageUri.value?.let { uri ->
                         Button(
-                            colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
-                            onClick = {
-                                imageUri.value = null
-                                return@Button
-                            }
+                            onClick = { imageUri.value = null },
+                            colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent)
                         ) {
                             Image(
                                 painter = rememberAsyncImagePainter(uri),
@@ -216,11 +166,6 @@ fun AddNoise(
                     }
 
                     Button(
-                        modifier = Modifier
-                            .padding(bottom = 20.dp)
-                            .padding(horizontal = 10.dp)
-                            .fillMaxWidth(),
-                        colors = ButtonDefaults.buttonColors(containerColor = Teal),
                         onClick = {
                             val storedAudioPath = audioUri.value?.let {
                                 saveUri(context, it, "audio_${System.currentTimeMillis()}")
@@ -231,15 +176,17 @@ fun AddNoise(
                             }
 
                             val newNoise = Noise(
-                                title.value,
-                                description.value,
-                                storedAudioPath ?: DEFAULT_AUDIO_URI,
-                                storedImagePath ?: DEFAULT_IMAGE_URI
+                                title = title.value,
+                                description = description.value,
+                                audioPath = storedAudioPath ?: currentSound?.audioPath ?: DEFAULT_AUDIO_URI,
+                                imagePath = storedImagePath ?: currentSound?.imagePath ?: DEFAULT_IMAGE_URI
                             )
 
                             validNoise.value = validateNoise(newNoise)
 
-                            notUnique.value =  soundsList.any { it.title == newNoise.title }
+                            notUnique.value = soundsList.any {
+                                it.title == newNoise.title && it != currentSound
+                            }
 
                             if (!validNoise.value.title) {
                                 supportTitle.value = "Each Sound deserves a title"
@@ -250,27 +197,35 @@ fun AddNoise(
                             }
 
                             if (!validNoise.value.audioPath) {
-                                supportaudio.value = "choose your Track"
+                                supportAudio.value = "Choose your Track"
                                 return@Button
                             }
 
-                            soundsList.add(newNoise)
+                            val index = soundsList.indexOfFirst { it.title == currentSound?.title }
+
+                            if (index != -1) {
+                                soundsList[index] = newNoise
+                            } else {
+                                soundsList.add(newNoise)
+                                // Clear form only if adding
+                                title.value = ""
+                                description.value = ""
+                                audioUri.value = null
+                                imageUri.value = null
+                            }
+
                             saveSounds(context, soundsList, SOUNDS_FILE_PATH)
-
-                            // Reset form state
-                            title.value = ""
-                            description.value = ""
-                            audioUri.value = null
-                            imageUri.value = null
-
                             onDismiss()
-                        }
+                        },
+                        modifier = Modifier
+                            .padding(10.dp)
+                            .fillMaxWidth(),
+                        colors = ButtonDefaults.buttonColors(containerColor = Teal)
                     ) {
-                        Text("Add Noise", color=Color.White)
+                        Text("Add Noise", color = Color.White)
                     }
                 }
             }
-
         }
     }
 }
