@@ -53,7 +53,7 @@ fun Library() {
             AddNoise(
                 showDialog = popUpDialog.value,
                 soundsList = customSounds,
-                currentSound = currentNoise.value
+                currentSound = currentNoise
             ) {
                 currentNoise.value = null
                 popUpDialog.value = false
@@ -71,7 +71,6 @@ fun Library() {
                 sounds = customSounds,
                 currentSound = currentNoise,
                 count = recomposeCounter,
-                popUpDialog = popUpDialog,
                 openDialogTrigger = openDialogTrigger,
                 context = context
             )

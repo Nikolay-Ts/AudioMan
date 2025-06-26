@@ -1,5 +1,6 @@
 package com.sonnenstahl.audioman
 
+import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
@@ -24,21 +25,22 @@ import com.sonnenstahl.audioman.utils.*
 fun AddNoise(
     showDialog: Boolean,
     soundsList: SnapshotStateList<Noise>,
-    currentSound: Noise?,
+    currentSound: MutableState<Noise?>,
     onDismiss: () -> Unit,
 ) {
+    Log.d("MEOW MEOW", "In the thingt ${currentSound.value}")
     val context = LocalContext.current
     val keyboard = LocalSoftwareKeyboardController.current
-
-    val title = remember { mutableStateOf(currentSound?.title ?: "") }
-    val description = remember { mutableStateOf(currentSound?.description ?: "") }
-    val audioUri = remember { mutableStateOf(currentSound?.audioPath?.toUri()) }
-    val imageUri = remember { mutableStateOf(currentSound?.imagePath?.toUri()) }
+    val currentSoundVal = currentSound?.value
+    val title = remember { mutableStateOf(currentSound.value?.title ?: "title") }
+    val description = remember { mutableStateOf(currentSound.value?.description ?: "description") }
+    val audioUri = remember { mutableStateOf(currentSoundVal?.audioPath?.toUri()) }
+    val imageUri = remember { mutableStateOf(currentSoundVal?.imagePath?.toUri()) }
 
     val supportTitle = remember { mutableStateOf("") }
     val supportAudio = remember { mutableStateOf("") }
-    val notUnique = remember { mutableStateOf(false) }
-    val validNoise = remember { mutableStateOf(ValidNoise()) }
+    val notUnique    = remember { mutableStateOf(false) }
+    val validNoise   = remember { mutableStateOf(ValidNoise()) }
 
     val audioPickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
@@ -47,6 +49,11 @@ fun AddNoise(
     val imagePickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri -> imageUri.value = uri }
+
+    LaunchedEffect(title.value, description.value) {
+        currentSound.value?.title = title.value
+        currentSound.value?.description = description.value
+    }
 
     if (showDialog) {
         Dialog(onDismissRequest = onDismiss) {
@@ -70,15 +77,16 @@ fun AddNoise(
 
                     Column(Modifier.padding(horizontal = 16.dp).fillMaxWidth()) {
                         TextField(
-                            value = title.value,
+                            value = currentSound.value?.title ?: title.value,
                             onValueChange = {
                                 title.value = it
+                                currentSound.value?.title = it
                                 if (!validNoise.value.title) {
                                     validNoise.value.title =
                                         soundsList.any { sound -> sound.title == title.value }
                                 }
                             },
-                            label = { Text("Title") },
+                            label = { "title" },
                             placeholder = { Text("Title of your own Noise") },
                             isError = !validNoise.value.title,
                             singleLine = true,
@@ -96,9 +104,9 @@ fun AddNoise(
                     }
 
                     TextField(
-                        value = description.value,
+                        value = currentSoundVal?.description ?: "description",
                         onValueChange = { description.value = it },
-                        label = { Text("Description") },
+                        label = { description.value },
                         placeholder = { Text("What makes your Noise special") },
                         singleLine = false,
                         modifier = Modifier
@@ -178,14 +186,14 @@ fun AddNoise(
                             val newNoise = Noise(
                                 title = title.value,
                                 description = description.value,
-                                audioPath = storedAudioPath ?: currentSound?.audioPath ?: DEFAULT_AUDIO_URI,
-                                imagePath = storedImagePath ?: currentSound?.imagePath ?: DEFAULT_IMAGE_URI
+                                audioPath = storedAudioPath ?: currentSoundVal?.audioPath ?: DEFAULT_AUDIO_URI,
+                                imagePath = storedImagePath ?: currentSoundVal?.imagePath ?: DEFAULT_IMAGE_URI
                             )
 
                             validNoise.value = validateNoise(newNoise)
 
                             notUnique.value = soundsList.any {
-                                it.title == newNoise.title && it != currentSound
+                                it.title == newNoise.title && it != currentSoundVal
                             }
 
                             if (!validNoise.value.title) {
@@ -201,7 +209,7 @@ fun AddNoise(
                                 return@Button
                             }
 
-                            val index = soundsList.indexOfFirst { it.title == currentSound?.title }
+                            val index = soundsList.indexOfFirst { it.title == currentSoundVal?.title }
 
                             if (index != -1) {
                                 soundsList[index] = newNoise
@@ -222,7 +230,8 @@ fun AddNoise(
                             .fillMaxWidth(),
                         colors = ButtonDefaults.buttonColors(containerColor = Teal)
                     ) {
-                        Text("Add Noise", color = Color.White)
+                        val text = if (currentSound.value == null) "Add Noise" else "modify"
+                        Text(text, color = Color.White)
                     }
                 }
             }

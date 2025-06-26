@@ -31,13 +31,13 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.media3.common.util.Log
+import androidx.media3.common.util.UnstableApi
 import coil.compose.rememberAsyncImagePainter
 import com.sonnenstahl.audioman.ui.theme.Teal
 import com.sonnenstahl.audioman.utils.AudioPlayer
@@ -105,6 +105,7 @@ fun ShowSounds(sounds: List<Noise>, context: Context) {
     }
 }
 
+@androidx.annotation.OptIn(UnstableApi::class)
 @RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterialApi::class, ExperimentalFoundationApi::class)
 @Composable
@@ -112,7 +113,6 @@ fun ShowCustomSounds(
     sounds: SnapshotStateList<Noise>,
     currentSound: MutableState<Noise?>,
     count: MutableState<Int>,
-    popUpDialog: MutableState<Boolean>,
     openDialogTrigger: MutableState<Boolean>,
     context: Context
 ) {
@@ -174,6 +174,7 @@ fun ShowCustomSounds(
 
                                 currentSound.value = sound
                                 openDialogTrigger.value = true
+                                Log.d("MEOW MEOW", "${currentSound.value}")
                             }
                         )
                 ) {
