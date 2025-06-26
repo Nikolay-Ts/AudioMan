@@ -25,7 +25,6 @@ fun Library() {
     val customSounds = remember { mutableStateListOf<Noise>() }
     val currentNoise = remember { mutableStateOf<Noise?>(null) }
     val recomposeCounter = remember { mutableIntStateOf(0) }
-    val openDialogTrigger = remember { mutableStateOf(false) }
 
     LaunchedEffect(recomposeCounter.intValue) {
         val loaded = loadSounds(context, SOUNDS_FILE_PATH)
@@ -33,12 +32,13 @@ fun Library() {
         customSounds.addAll(loaded)
     }
 
-    // Delay dialog open to allow currentNoise to propagate
-    LaunchedEffect(openDialogTrigger.value) {
-        if (openDialogTrigger.value) {
-            popUpDialog.value = true
-            openDialogTrigger.value = false
-        }
+    AddNoise(
+        showDialog = popUpDialog.value,
+        soundsList = customSounds,
+        currentSound = currentNoise
+    ) {
+        currentNoise.value = null
+        popUpDialog.value = false
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
@@ -50,14 +50,6 @@ fun Library() {
             verticalArrangement = Arrangement.spacedBy(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            AddNoise(
-                showDialog = popUpDialog.value,
-                soundsList = customSounds,
-                currentSound = currentNoise
-            ) {
-                currentNoise.value = null
-                popUpDialog.value = false
-            }
 
             Text(
                 text = "Sound Library",
@@ -71,7 +63,7 @@ fun Library() {
                 sounds = customSounds,
                 currentSound = currentNoise,
                 count = recomposeCounter,
-                openDialogTrigger = openDialogTrigger,
+                openDialogTrigger = popUpDialog,
                 context = context
             )
         }

@@ -3,7 +3,6 @@ package com.sonnenstahl.audioman
 import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
@@ -17,7 +16,6 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.core.net.toUri
-import coil.compose.rememberAsyncImagePainter
 import com.sonnenstahl.audioman.ui.theme.Teal
 import com.sonnenstahl.audioman.utils.*
 
@@ -33,7 +31,6 @@ fun AddNoise(
     Log.d("MEOW MEOW", "In the thingt ${currentSound.value}")
     val context         = LocalContext.current
     val keyboard        = LocalSoftwareKeyboardController.current
-    val currentSoundVal = currentSound?.value
     val title           = remember { mutableStateOf(currentSound.value?.title ?: "title") }
     val description     = remember { mutableStateOf(currentSound.value?.description ?: "description") }
     val audioUri        = remember { mutableStateOf(currentSound.value?.audioPath?.toUri()) }
@@ -99,9 +96,8 @@ fun AddNoise(
                             modifier = Modifier.padding(top = 4.dp)
                         )
                     }
-
                     TextField(
-                        value = currentSoundVal?.description ?: "description",
+                        value = currentSound?.value?.description ?: "description",
                         onValueChange = { description.value = it },
                         label = { description.value },
                         placeholder = { Text("What makes your Noise special") },
@@ -116,6 +112,8 @@ fun AddNoise(
                     )
 
                     Column(Modifier.padding(horizontal = 16.dp).fillMaxWidth()) {
+                        Log.d("MEOW MEOW", "In the thing in ${currentSound.value}")
+
                         OutlinedButton(
                             onClick = {
                                 keyboard?.hide()
@@ -166,6 +164,7 @@ fun AddNoise(
                                 saveUri(context, it, "audio_${System.currentTimeMillis()}")
                             }
 
+
                             val storedImagePath = imageUri.value?.let {
                                 saveUri(context, it, "image_${System.currentTimeMillis()}")
                             }
@@ -173,14 +172,14 @@ fun AddNoise(
                             val newNoise = Noise(
                                 title = title.value,
                                 description = description.value,
-                                audioPath = storedAudioPath ?: currentSoundVal?.audioPath ?: DEFAULT_AUDIO_URI,
-                                imagePath = storedImagePath ?: currentSoundVal?.imagePath ?: DEFAULT_IMAGE_URI
+                                audioPath = storedAudioPath ?: currentSound?.value?.audioPath ?: DEFAULT_AUDIO_URI,
+                                imagePath = storedImagePath ?: currentSound?.value?.imagePath ?: DEFAULT_IMAGE_URI
                             )
 
                             validNoise.value = validateNoise(newNoise)
 
                             notUnique.value = soundsList.any {
-                                it.title == newNoise.title && it != currentSoundVal
+                                it.title == newNoise.title && it != currentSound?.value
                             }
 
                             if (!validNoise.value.title) {
@@ -196,7 +195,9 @@ fun AddNoise(
                                 return@Button
                             }
 
-                            val index = soundsList.indexOfFirst { it.title == currentSoundVal?.title }
+
+
+                            val index = soundsList.indexOfFirst { it.title == currentSound?.value?.title }
 
                             if (index != -1) {
                                 soundsList[index] = newNoise

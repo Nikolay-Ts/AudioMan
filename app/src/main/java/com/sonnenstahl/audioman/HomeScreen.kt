@@ -47,8 +47,11 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.media3.common.util.UnstableApi
 import androidx.navigation.NavController
+import coil.compose.AsyncImage
 import com.sonnenstahl.audioman.utils.AudioPlayer
 import com.sonnenstahl.audioman.utils.CURRENT_SOUND_PATH
+import com.sonnenstahl.audioman.utils.DEFAULT_IMAGE_URI
+import com.sonnenstahl.audioman.utils.DEFAULT_LIGHT_IMAGE
 import com.sonnenstahl.audioman.utils.loadSound
 
 const val PLAYING_IMAGE_SIZE: Int = 250;
@@ -91,67 +94,69 @@ fun HomeScreen(navController: NavController) {
             )
         }
 
-        if (currentlyPLaying.value.imagePath == "default.svg") {
-            val imagePath = when (isSystemInDarkTheme()) {
-                true -> "default-white.svg"
-                false -> "default.svg"
+        val imagePath = if (currentlyPLaying.value.imagePath == DEFAULT_IMAGE_URI) {
+            if (isSystemInDarkTheme()) {
+                DEFAULT_LIGHT_IMAGE
+            } else {
+                DEFAULT_IMAGE_URI
             }
-            SvgImageFromAssets(
-                imagePath,
-                modifier = Modifier.size(imageSize)
-            )
-        }
-        else if (currentlyPLaying.value.imagePath.substringAfter(".", "") == "svg") {
-            SvgImageFromAssets(
-                currentlyPLaying.value.imagePath,
-                modifier = Modifier.size(imageSize)
-            )
         } else {
-            val imagePath = currentlyPLaying.value.imagePath
-            val imageFile = File(imagePath)
+            currentlyPLaying.value.imagePath
+        }
+        val imageFile = File(imagePath)
 
-            if (imageFile.exists()) {
-                val rotatedBitmap by produceState<Bitmap?>(initialValue = null, key1 = imagePath) {
-                    value = runCatching {
-                        val originalBitmap = BitmapFactory.decodeFile(imageFile.absolutePath)
-                        val exif = ExifInterface(imageFile.absolutePath)
-                        val orientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL)
-                        when (orientation) {
-                            ExifInterface.ORIENTATION_ROTATE_90 -> Bitmap.createBitmap(originalBitmap, 0, 0, originalBitmap.width, originalBitmap.height, Matrix().apply { postRotate(90f) }, true)
-                            ExifInterface.ORIENTATION_ROTATE_180 -> Bitmap.createBitmap(originalBitmap, 0, 0, originalBitmap.width, originalBitmap.height, Matrix().apply { postRotate(180f) }, true)
-                            ExifInterface.ORIENTATION_ROTATE_270 -> Bitmap.createBitmap(originalBitmap, 0, 0, originalBitmap.width, originalBitmap.height, Matrix().apply { postRotate(270f) }, true)
-                            else -> originalBitmap
-                        }
-                    }.getOrNull()
-                }
+        if (imageFile.exists()) {
+            val rotatedBitmap by produceState<Bitmap?>(initialValue = null, key1 = imagePath) {
+                value = runCatching {
+                    val originalBitmap = BitmapFactory.decodeFile(imageFile.absolutePath)
+                    val exif = ExifInterface(imageFile.absolutePath)
+                    val orientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL)
+                    when (orientation) {
+                        ExifInterface.ORIENTATION_ROTATE_90 -> Bitmap.createBitmap(originalBitmap, 0, 0, originalBitmap.width, originalBitmap.height, Matrix().apply { postRotate(90f) }, true)
+                        ExifInterface.ORIENTATION_ROTATE_180 -> Bitmap.createBitmap(originalBitmap, 0, 0, originalBitmap.width, originalBitmap.height, Matrix().apply { postRotate(180f) }, true)
+                        ExifInterface.ORIENTATION_ROTATE_270 -> Bitmap.createBitmap(originalBitmap, 0, 0, originalBitmap.width, originalBitmap.height, Matrix().apply { postRotate(270f) }, true)
+                        else -> originalBitmap
+                    }
+                }.getOrNull()
+            }
 
-                if (rotatedBitmap != null) {
-                    Box(
+            if (rotatedBitmap != null) {
+                Box(
+                    modifier = Modifier
+                        .height(PLAYING_IMAGE_SIZE.dp)
+                ) {
+                    Image(
+                        bitmap = rotatedBitmap!!.asImageBitmap(),
+                        contentDescription = "User Image",
                         modifier = Modifier
-                            .height(PLAYING_IMAGE_SIZE.dp)
-                    ) {
+                            .size(imageSize)
+                            .clip(RoundedCornerShape(16.dp))
+                            .border(2.dp, Color.Gray, RoundedCornerShape(16.dp))
+                    )
+                }
+            }
+        } else {
+            val assetBitmap = runCatching {
+                context.assets.open(imagePath).use { inputStream ->
+                    BitmapFactory.decodeStream(inputStream)
+                }
+            }.getOrNull()
+
+            if (assetBitmap != null) {
+                Box(
+                    modifier = Modifier
+                        .height(PLAYING_IMAGE_SIZE.dp)
+                ) {
+                    val isDefault = imagePath == DEFAULT_IMAGE_URI || imagePath == DEFAULT_LIGHT_IMAGE
+                    if (isDefault) {
                         Image(
-                            bitmap = rotatedBitmap!!.asImageBitmap(),
-                            contentDescription = "User Image",
+                            bitmap = assetBitmap.asImageBitmap(),
+                            contentDescription = "Asset Image",
                             modifier = Modifier
                                 .size(imageSize)
                                 .clip(RoundedCornerShape(16.dp))
-                                .border(2.dp, Color.Gray, RoundedCornerShape(16.dp))
                         )
-                    }
-                }
-            } else {
-                val assetBitmap = runCatching {
-                    context.assets.open(imagePath).use { inputStream ->
-                        BitmapFactory.decodeStream(inputStream)
-                    }
-                }.getOrNull()
-
-                if (assetBitmap != null) {
-                    Box(
-                        modifier = Modifier
-                            .height(PLAYING_IMAGE_SIZE.dp)
-                    ) {
+                    } else {
                         Image(
                             bitmap = assetBitmap.asImageBitmap(),
                             contentDescription = "Asset Image",

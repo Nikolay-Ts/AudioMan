@@ -42,6 +42,7 @@ import coil.compose.rememberAsyncImagePainter
 import com.sonnenstahl.audioman.ui.theme.Teal
 import com.sonnenstahl.audioman.utils.AudioPlayer
 import com.sonnenstahl.audioman.utils.CURRENT_SOUND_PATH
+import com.sonnenstahl.audioman.utils.DEFAULT_LIGHT_IMAGE
 import com.sonnenstahl.audioman.utils.Noise
 import com.sonnenstahl.audioman.utils.SOUNDS_FILE_PATH
 import com.sonnenstahl.audioman.utils.fallBackSound
@@ -78,20 +79,13 @@ fun ShowSounds(sounds: List<Noise>, context: Context) {
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                val isSvg = sound.imagePath.endsWith(".svg", ignoreCase = true)
-
-                if (isSvg) {
-                    SvgImageFromAssets(
-                        sound.imagePath,
-                        modifier = Modifier.size(40.dp)
-                    )
-                } else {
-                    Image(
-                        painter = rememberAsyncImagePainter(File(sound.imagePath)),
-                        contentDescription = null,
-                        modifier = Modifier.size(40.dp)
-                    )
-                }
+                Image(
+                    painter = rememberAsyncImagePainter(
+                        model = File()
+                    ),
+                    contentDescription = null,
+                    modifier = Modifier.size(40.dp)
+                )
 
                 Column {
                     Text(text = sound.title, style = MaterialTheme.typography.titleMedium)
@@ -182,20 +176,11 @@ fun ShowCustomSounds(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
-                        val isSvg = sound.imagePath.endsWith(".svg", ignoreCase = true)
-
-                        if (isSvg) {
-                            SvgImageFromAssets(
-                                sound.imagePath,
-                                modifier = Modifier.size(40.dp)
-                            )
-                        } else {
-                            Image(
-                                painter = rememberAsyncImagePainter(File(sound.imagePath)),
-                                contentDescription = null,
-                                modifier = Modifier.size(40.dp)
-                            )
-                        }
+                        Image(
+                            painter = rememberAsyncImagePainter(File(sound.imagePath)),
+                            contentDescription = null,
+                            modifier = Modifier.size(40.dp)
+                        )
 
                         Column {
                             Text(text = sound.title, style = MaterialTheme.typography.titleMedium)
