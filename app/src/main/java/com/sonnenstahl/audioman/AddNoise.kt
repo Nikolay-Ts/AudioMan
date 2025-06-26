@@ -21,6 +21,8 @@ import coil.compose.rememberAsyncImagePainter
 import com.sonnenstahl.audioman.ui.theme.Teal
 import com.sonnenstahl.audioman.utils.*
 
+const val PREFIX: String = "/data/user/0/com.sonnenstahl.audioman/files/"
+
 @Composable
 fun AddNoise(
     showDialog: Boolean,
@@ -29,13 +31,13 @@ fun AddNoise(
     onDismiss: () -> Unit,
 ) {
     Log.d("MEOW MEOW", "In the thingt ${currentSound.value}")
-    val context = LocalContext.current
-    val keyboard = LocalSoftwareKeyboardController.current
+    val context         = LocalContext.current
+    val keyboard        = LocalSoftwareKeyboardController.current
     val currentSoundVal = currentSound?.value
-    val title = remember { mutableStateOf(currentSound.value?.title ?: "title") }
-    val description = remember { mutableStateOf(currentSound.value?.description ?: "description") }
-    val audioUri = remember { mutableStateOf(currentSoundVal?.audioPath?.toUri()) }
-    val imageUri = remember { mutableStateOf(currentSoundVal?.imagePath?.toUri()) }
+    val title           = remember { mutableStateOf(currentSound.value?.title ?: "title") }
+    val description     = remember { mutableStateOf(currentSound.value?.description ?: "description") }
+    val audioUri        = remember { mutableStateOf(currentSound.value?.audioPath?.toUri()) }
+    val imageUri        = remember { mutableStateOf(currentSound.value?.imagePath?.toUri()) }
 
     val supportTitle = remember { mutableStateOf("") }
     val supportAudio = remember { mutableStateOf("") }
@@ -49,11 +51,6 @@ fun AddNoise(
     val imagePickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri -> imageUri.value = uri }
-
-    LaunchedEffect(title.value, description.value) {
-        currentSound.value?.title = title.value
-        currentSound.value?.description = description.value
-    }
 
     if (showDialog) {
         Dialog(onDismissRequest = onDismiss) {
@@ -127,8 +124,11 @@ fun AddNoise(
                             modifier = Modifier.fillMaxWidth()
                         ) {
                             Text(
+
                                 if (audioUri.value != null)
-                                    "Selected: ${audioUri.value?.lastPathSegment}"
+                                    "Selected Track: ${audioUri.value?.lastPathSegment}"
+                                else if (currentSound.value?.audioPath != null)
+                                    "Selected Track: ${currentSound.value?.audioPath?.substring(PREFIX.length)}"
                                 else "Track",
                                 color = Color.White
                             )
@@ -152,25 +152,12 @@ fun AddNoise(
                         Text(
                             if (imageUri.value != null)
                                 "Selected Image: ${imageUri.value?.lastPathSegment}"
+                            else if (currentSound.value?.imagePath != null) {
+                                "Selected Image: ${currentSound.value?.imagePath?.substring(PREFIX.length)}"
+                            }
                             else "Cover",
                             color = Color.White
                         )
-                    }
-
-                    imageUri.value?.let { uri ->
-                        Button(
-                            onClick = { imageUri.value = null },
-                            colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent)
-                        ) {
-                            Image(
-                                painter = rememberAsyncImagePainter(uri),
-                                contentDescription = "Selected Image",
-                                modifier = Modifier
-                                    .padding(16.dp)
-                                    .height(100.dp)
-                                    .fillMaxWidth()
-                            )
-                        }
                     }
 
                     Button(
@@ -215,14 +202,13 @@ fun AddNoise(
                                 soundsList[index] = newNoise
                             } else {
                                 soundsList.add(newNoise)
-                                // Clear form only if adding
-                                title.value = ""
-                                description.value = ""
-                                audioUri.value = null
-                                imageUri.value = null
                             }
 
                             saveSounds(context, soundsList, SOUNDS_FILE_PATH)
+                            title.value = ""
+                            description.value = ""
+                            audioUri.value = null
+                            imageUri.value = null
                             onDismiss()
                         },
                         modifier = Modifier
