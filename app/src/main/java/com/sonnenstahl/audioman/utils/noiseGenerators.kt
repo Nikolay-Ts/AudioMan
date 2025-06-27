@@ -12,6 +12,7 @@ import java.io.File
 import java.io.FileOutputStream
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
+import java.util.UUID
 import kotlin.random.Random
 
 fun generateNoiseSamples(
@@ -109,9 +110,10 @@ fun updateGraphData(
     val audioPath = writeWav(samplesState.value, sampleRate, file)
 
     val sound = Noise(
-        "Generated Noise",
-        "Noise generated via sliders",
-        audioPath,
+        id = UUID.randomUUID().toString(),
+        title =  "Generated Noise",
+        description =  "Noise generated via sliders",
+        audioPath = audioPath,
     )
 
     val customNoise = CustomNoise(

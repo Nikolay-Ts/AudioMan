@@ -16,7 +16,7 @@ data class Noise(
     var imagePath:   String = DEFAULT_LIGHT_IMAGE
 )
 
-val fallBackSound = Noise("Nothing Selected", "Pick a Sound from the library!", "")
+val fallBackSound = Noise("-1", "Nothing Selected", "Pick a Sound from the library!", "")
 
 val defaultSounds = listOf(
     Noise("0", "Coffee Shop" , "people talking in a coffee shop" , "coffee_shop.m4a"),

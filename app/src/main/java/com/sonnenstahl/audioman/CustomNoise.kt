@@ -5,6 +5,7 @@ import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -27,6 +28,7 @@ import com.sonnenstahl.audioman.utils.updateGraphData
 import com.sonnenstahl.audioman.utils.writeWav
 import kotlinx.coroutines.launch
 import java.io.File
+import java.util.UUID
 
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -36,8 +38,8 @@ fun CustomNoise() {
 
     var customNoise by remember { mutableStateOf(loadCustomSound(context, CUSTOM_SOUND_PATH)) }
     var noiseType by remember { mutableStateOf(customNoise?.noiseType ?: "White") }
-    var amplitude by remember { mutableFloatStateOf(customNoise?.amplitude ?: 0.5f) }
-    var spectrum by remember { mutableFloatStateOf(customNoise?.spectrum ?: 0.5f) }
+    var amplitude by rememberSaveable { mutableFloatStateOf(customNoise?.amplitude ?: 0.5f) }
+    var spectrum by rememberSaveable { mutableFloatStateOf(customNoise?.spectrum ?: 0.5f) }
     val isPlaying = remember { mutableStateOf(AudioPlayer.isPlaying()) }
     val previewSamples = remember {
         mutableStateOf<ByteArray>(customNoise?.samples ?: ByteArray(size = 44100 * 2))
@@ -126,62 +128,62 @@ fun CustomNoise() {
                     )
                 }
             )
-
             AnimatedPause(
                 isPlaying.value,
                 200
             ) {
-            when (isPlaying.value) {
-                true -> {
-                    AudioPlayer.pause()
-                    isPlaying.value = false
-                }
 
-                false -> {
-                    coroutineScope.launch {
-                        lineColor.value = when (noiseType) {
-                            "White" -> Color.Gray
-                            "Pink"  -> Pink40
-                            "Brown" -> Brown
-                            else -> Color.White
-                        }
-                        val file = File(context.cacheDir, "generated_noise.wav")
-                        val sampleRate = 44100
-                        val durationSec = 1
+                when (isPlaying.value) {
+                    true -> {
+                        AudioPlayer.pause()
+                        isPlaying.value = false
+                    }
 
-                        val samples =
-                            generateNoiseSamples(
+                    false -> {
+                        coroutineScope.launch {
+                            lineColor.value = when (noiseType) {
+                                "White" -> Color.Gray
+                                "Pink"  -> Pink40
+                                "Brown" -> Brown
+                                else -> Color.White
+                            }
+                            val file = File(context.cacheDir, "generated_noise.wav")
+                            val sampleRate = 44100
+                            val durationSec = 1
+
+                            val samples =
+                                generateNoiseSamples(
+                                    noiseType,
+                                    amplitude,
+                                    spectrum,
+                                    sampleRate,
+                                    durationSec
+                                )
+
+                            previewSamples.value = samples
+                            val path = writeWav(samples, sampleRate, file)
+
+                            val sound = Noise(
+                                UUID.randomUUID().toString(),
+                                "Generated Noise",
+                                "Noise generated via sliders",
+                                path
+                            )
+
+                            val customNoise = CustomNoise(
                                 noiseType,
                                 amplitude,
                                 spectrum,
-                                sampleRate,
-                                durationSec
+                                samples
                             )
 
-                        previewSamples.value = samples
-
-                        val path = writeWav(samples, sampleRate, file)
-
-                        val sound = Noise(
-                            "Generated Noise",
-                            "Noise generated via sliders",
-                            path
-                        )
-
-                        val customNoise = CustomNoise(
-                            noiseType,
-                            amplitude,
-                            spectrum,
-                            samples
-                        )
-
-                        saveCustomSound(context, customNoise, CUSTOM_SOUND_PATH)
-                        saveSound(context, sound, CURRENT_SOUND_PATH)
-                        AudioPlayer.playAsset(context, sound)
+                            saveCustomSound(context, customNoise, CUSTOM_SOUND_PATH)
+                            saveSound(context, sound, CURRENT_SOUND_PATH)
+                            AudioPlayer.playAsset(context, sound)
+                        }
+                        AudioPlayer.play()
+                        isPlaying.value = true
                     }
-                    AudioPlayer.play()
-                    isPlaying.value = true
-                }
             }
         }
         }
