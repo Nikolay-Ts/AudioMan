@@ -14,6 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.media3.common.util.Log
 import com.sonnenstahl.audioman.utils.*
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -31,6 +32,7 @@ fun Library() {
         customSounds.clear()
         customSounds.addAll(loaded)
     }
+
 
     AddNoise(
         showDialog = popUpDialog.value,

@@ -1,6 +1,7 @@
 package com.sonnenstahl.audioman.utils
 
 import kotlinx.serialization.Serializable
+import java.util.UUID
 
 const val DEFAULT_AUDIO_URI: String  = "default.m4a"
 const val DEFAULT_IMAGE_URI: String  = "default.png"
@@ -8,6 +9,7 @@ const val DEFAULT_LIGHT_IMAGE: String = "default-white.png"
 
 @Serializable
 data class Noise(
+    val id:          String = UUID.randomUUID().toString(),
     var title:       String,
     var description: String,
     var audioPath:   String = DEFAULT_AUDIO_URI,
@@ -17,11 +19,11 @@ data class Noise(
 val fallBackSound = Noise("Nothing Selected", "Pick a Sound from the library!", "")
 
 val defaultSounds = listOf(
-    Noise("Coffee Shop" , "people talking in a coffee shop" , "coffee_shop.m4a"),
-    Noise("Rain"        , "rain outside of your window"     , "rain.m4a"       ),
-    Noise("Forest"      , "wild forest"                     , "forest.m4a"     ),
-    Noise("Campfire"    , "sitting by the campfire"         , "fire.m4a"       ),
-    Noise("City Traffic", "cars honking at each other"      , "city.m4a"       )
+    Noise("0", "Coffee Shop" , "people talking in a coffee shop" , "coffee_shop.m4a"),
+    Noise("1", "Rain"        , "rain outside of your window"     , "rain.m4a"       ),
+    Noise("2", "Forest"      , "wild forest"                     , "forest.m4a"     ),
+    Noise("3", "Campfire"    , "sitting by the campfire"         , "fire.m4a"       ),
+    Noise("4", "City Traffic", "cars honking at each other"      , "city.m4a"       )
 )
 
 /**

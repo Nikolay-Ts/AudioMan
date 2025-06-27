@@ -64,6 +64,12 @@ object AudioPlayer {
         sound = noise
     }
 
+    fun getVolume() = getPlayer()?.volume
+
+    fun setVolume(newVolume: Float) {
+        getPlayer()?.volume = newVolume
+    }
+
     fun clearSound() {
         sound = null
     }

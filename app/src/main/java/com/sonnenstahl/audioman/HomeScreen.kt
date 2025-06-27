@@ -10,26 +10,19 @@ import android.os.Build
 import androidx.annotation.OptIn
 import androidx.annotation.RequiresApi
 import androidx.compose.animation.core.animateDpAsState
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.ModalDrawer
 import androidx.compose.runtime.getValue
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.produceState
@@ -38,16 +31,21 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.foundation.border
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Slider
+import androidx.compose.material3.SliderDefaults
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.media3.common.util.UnstableApi
 import androidx.navigation.NavController
-import coil.compose.AsyncImage
+import coil.compose.rememberAsyncImagePainter
+import com.sonnenstahl.audioman.ui.theme.LightTeal
+import com.sonnenstahl.audioman.ui.theme.Teal
 import com.sonnenstahl.audioman.utils.AudioPlayer
 import com.sonnenstahl.audioman.utils.CURRENT_SOUND_PATH
 import com.sonnenstahl.audioman.utils.DEFAULT_IMAGE_URI
@@ -55,15 +53,16 @@ import com.sonnenstahl.audioman.utils.DEFAULT_LIGHT_IMAGE
 import com.sonnenstahl.audioman.utils.loadSound
 
 const val PLAYING_IMAGE_SIZE: Int = 250;
-const val PAUSED_IMAGE_SIZE: Int = (PLAYING_IMAGE_SIZE*0.75).toInt()
+const val PAUSED_IMAGE_SIZE:  Int = (PLAYING_IMAGE_SIZE*0.75).toInt()
 
 @RequiresApi(Build.VERSION_CODES.O)
-@OptIn(UnstableApi::class)
+//@OptIn(UnstableApi::class, ExperimentalMaterial3Api::class, ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(navController: NavController) {
     val context = LocalContext.current
     val isPlaying = remember { mutableStateOf(AudioPlayer.isPlaying()) }
     val currentlyPLaying = remember { mutableStateOf(AudioPlayer.getSound()) }
+    val volume = remember { mutableStateOf(AudioPlayer.getVolume()) }
 
     LaunchedEffect(Unit) {
         AudioPlayer.initialize(context)
@@ -84,7 +83,7 @@ fun HomeScreen(navController: NavController) {
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(top = 100.dp),
+                .padding(top = 50.dp),
             contentAlignment = Alignment.TopCenter
         ) {
             Text(
@@ -173,7 +172,8 @@ fun HomeScreen(navController: NavController) {
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(bottom = 48.dp),
+                .padding(bottom = 48.dp)
+                .padding(top = 20.dp),
             contentAlignment = Alignment.BottomCenter
         ) {
             Column(
@@ -191,6 +191,22 @@ fun HomeScreen(navController: NavController) {
 
                 Spacer(modifier = Modifier.height(24.dp))
 
+                Row(modifier = Modifier.fillMaxWidth().padding(horizontal = 25.dp)) {
+                    Slider(
+                        value = volume.value ?: 0.5f ,
+                        onValueChange = { volume.value = it },
+                        onValueChangeFinished = { AudioPlayer.setVolume(volume.value ?: 0.5f) },
+                        valueRange = 0f..1f,
+                        colors = SliderDefaults.colors(
+                            thumbColor = Teal,
+                            activeTrackColor = LightTeal,
+                            inactiveTrackColor = Color.White
+                        )
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(10.dp))
+
                 AnimatedPause(isPlaying.value) {
                     when (isPlaying.value) {
                         true -> {
@@ -203,6 +219,7 @@ fun HomeScreen(navController: NavController) {
                         }
                     }
                 }
+
             }
         }
     }
