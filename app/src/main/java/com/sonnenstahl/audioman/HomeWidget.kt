@@ -20,10 +20,23 @@ import androidx.glance.layout.fillMaxSize
 import androidx.glance.layout.padding
 import androidx.glance.text.Text
 import androidx.datastore.preferences.core.*
+import androidx.glance.GlanceNode
+import androidx.glance.Image
+import androidx.glance.ImageProvider
+import androidx.glance.action.clickable
+import androidx.glance.appwidget.action.actionRunCallback
+import androidx.glance.currentState
+import androidx.glance.layout.Box
 import androidx.glance.state.*
+import com.sonnenstahl.audioman.utils.UpdateAudioPlayer
 
+val TITLE_KEY = stringPreferencesKey("title")
+val DESCRIPTION_KEY = stringPreferencesKey("description")
+val IS_PLAYING_KEY = booleanPreferencesKey("isPlaying")
+val COVER_URI_KEY = stringPreferencesKey("coverUri")
 
 class HomeWidget : GlanceAppWidget() {
+
 
     override suspend fun provideGlance(context: Context, id: GlanceId) {
 
@@ -31,23 +44,45 @@ class HomeWidget : GlanceAppWidget() {
         // Use `withContext` to switch to another thread for long running
         // operations.
 
-        val TITLE_KEY = stringPreferencesKey("title")
-        val DESCRIPTION_KEY = stringPreferencesKey("description")
-        val IS_PLAYING_KEY = booleanPreferencesKey("isPlaying")
-        val COVER_URI_KEY = stringPreferencesKey("coverUri")
+
 
         provideContent {
-            Row(
+            val preferences = currentState<Preferences>()
+            val title = preferences[TITLE_KEY] ?: "title"
+            val isPlaying = preferences[IS_PLAYING_KEY]
+            Box(
                 modifier = GlanceModifier
-                    .fillMaxSize()
-                    .background(Color.White)
-                    .padding(10.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalAlignment   = Alignment.Vertical.CenterVertically
+                    .clickable(actionRunCallback<UpdateAudioPlayer>())
             ) {
-                Column {
-                    Text("Title")
-                    Text("Description")
+                Row(
+                    modifier = GlanceModifier
+                        .fillMaxSize()
+                        .background(Color.White)
+                        .padding(10.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalAlignment   = Alignment.Vertical.CenterVertically
+                ) {
+                    Column {
+                        Text(title)
+                        Text("Description")
+                    }
+                    if (isPlaying == true) {
+                        Image(
+                            provider = ImageProvider(R.drawable.pause),
+                            contentDescription = "Play/Pause",
+                            modifier = GlanceModifier
+                                .padding(8.dp)
+                                .clickable(actionRunCallback<UpdateAudioPlayer>())
+                        )
+                    } else {
+                        Image(
+                            provider = ImageProvider(R.drawable.play),
+                            contentDescription = "Play/Pause",
+                            modifier = GlanceModifier
+                                .padding(8.dp)
+                                .clickable(actionRunCallback<UpdateAudioPlayer>())
+                        )
+                    }
                 }
             }
         }
