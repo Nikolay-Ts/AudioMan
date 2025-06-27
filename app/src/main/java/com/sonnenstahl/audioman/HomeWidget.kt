@@ -31,12 +31,9 @@ import androidx.glance.action.clickable
 import androidx.glance.appwidget.action.actionRunCallback
 import androidx.glance.currentState
 import androidx.glance.layout.Box
+import androidx.glance.layout.fillMaxWidth
 import androidx.glance.layout.size
-import androidx.glance.state.*
-import coil.compose.rememberAsyncImagePainter
-import com.sonnenstahl.audioman.utils.AudioPlayer
 import com.sonnenstahl.audioman.utils.UpdateAudioPlayer
-import java.io.File
 
 val TITLE_KEY = stringPreferencesKey("title")
 val DESCRIPTION_KEY = stringPreferencesKey("description")
@@ -51,44 +48,44 @@ class HomeWidget : GlanceAppWidget() {
             val isPlaying = preferences[IS_PLAYING_KEY]
             Box(
                 modifier = GlanceModifier
+                    .fillMaxWidth()
                     .clickable(actionStartActivity<MainActivity>())
             ) {
+
                 Row(
                     modifier = GlanceModifier
                         .fillMaxSize()
                         .background(Color.White)
-                        .padding(10.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalAlignment   = Alignment.Vertical.CenterVertically
+                        .padding(16.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalAlignment = Alignment.Start
                 ) {
                     Image(
                         provider = ImageProvider(R.drawable.default_black),
-                        contentDescription = "Play/Pause",
+                        contentDescription = "Cover Image",
                         modifier = GlanceModifier
-                            .padding(8.dp)
-                            .size(50 "".dp)
+                            .padding(end = 8.dp)
+                            .size(50.dp)
                     )
-                    Column {
+
+                    Column(
+                        modifier = GlanceModifier.defaultWeight(),
+                        horizontalAlignment = Alignment.Start,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
                         Text(title)
                         Text("Description")
                     }
-                    if (isPlaying == true) {
-                        Image(
-                            provider = ImageProvider(R.drawable.pause),
-                            contentDescription = "Play/Pause",
-                            modifier = GlanceModifier
-                                .padding(8.dp)
-                                .clickable(actionRunCallback<UpdateAudioPlayer>())
-                        )
-                    } else {
-                        Image(
-                            provider = ImageProvider(R.drawable.play),
-                            contentDescription = "Play/Pause",
-                            modifier = GlanceModifier
-                                .padding(8.dp)
-                                .clickable(actionRunCallback<UpdateAudioPlayer>())
-                        )
-                    }
+
+                    val playPauseIcon = if (isPlaying == true) R.drawable.pause else R.drawable.play
+                    Image(
+                        provider = ImageProvider(playPauseIcon),
+                        contentDescription = "Play/Pause",
+                        modifier = GlanceModifier
+                            .padding(start = 8.dp)
+                            .size(50.dp)
+                            .clickable(actionRunCallback<UpdateAudioPlayer>())
+                    )
                 }
             }
         }
