@@ -1,10 +1,13 @@
 package com.sonnenstahl.audioman
 
 import android.content.Context
+import android.graphics.BitmapFactory
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -23,12 +26,17 @@ import androidx.datastore.preferences.core.*
 import androidx.glance.GlanceNode
 import androidx.glance.Image
 import androidx.glance.ImageProvider
+import androidx.glance.action.actionStartActivity
 import androidx.glance.action.clickable
 import androidx.glance.appwidget.action.actionRunCallback
 import androidx.glance.currentState
 import androidx.glance.layout.Box
+import androidx.glance.layout.size
 import androidx.glance.state.*
+import coil.compose.rememberAsyncImagePainter
+import com.sonnenstahl.audioman.utils.AudioPlayer
 import com.sonnenstahl.audioman.utils.UpdateAudioPlayer
+import java.io.File
 
 val TITLE_KEY = stringPreferencesKey("title")
 val DESCRIPTION_KEY = stringPreferencesKey("description")
@@ -36,23 +44,14 @@ val IS_PLAYING_KEY = booleanPreferencesKey("isPlaying")
 val COVER_URI_KEY = stringPreferencesKey("coverUri")
 
 class HomeWidget : GlanceAppWidget() {
-
-
     override suspend fun provideGlance(context: Context, id: GlanceId) {
-
-        // In this method, load data needed to render the AppWidget.
-        // Use `withContext` to switch to another thread for long running
-        // operations.
-
-
-
         provideContent {
             val preferences = currentState<Preferences>()
             val title = preferences[TITLE_KEY] ?: "title"
             val isPlaying = preferences[IS_PLAYING_KEY]
             Box(
                 modifier = GlanceModifier
-                    .clickable(actionRunCallback<UpdateAudioPlayer>())
+                    .clickable(actionStartActivity<MainActivity>())
             ) {
                 Row(
                     modifier = GlanceModifier
@@ -62,6 +61,13 @@ class HomeWidget : GlanceAppWidget() {
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalAlignment   = Alignment.Vertical.CenterVertically
                 ) {
+                    Image(
+                        provider = ImageProvider(R.drawable.default_black),
+                        contentDescription = "Play/Pause",
+                        modifier = GlanceModifier
+                            .padding(8.dp)
+                            .size(50 "".dp)
+                    )
                     Column {
                         Text(title)
                         Text("Description")
