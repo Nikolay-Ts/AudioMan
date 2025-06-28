@@ -49,6 +49,12 @@ fun AddNoise(
         contract = ActivityResultContracts.GetContent()
     ) { uri -> imageUri.value = uri }
 
+
+    LaunchedEffect(currentSound.value) {
+        title.value = currentSound.value?.title ?: "title"
+        description.value = currentSound.value?.description ?: "description"
+    }
+
     if (showDialog) {
         Dialog(onDismissRequest = onDismiss) {
             Card(
@@ -69,12 +75,12 @@ fun AddNoise(
                         modifier = Modifier.padding(top = 25.dp)
                     )
 
+                    // input fields
                     Column(Modifier.padding(horizontal = 16.dp).fillMaxWidth()) {
                         TextField(
-                            value = currentSound.value?.title ?: title.value,
+                            value = title.value,
                             onValueChange = {
                                 title.value = it
-                                currentSound.value?.title = it
                                 if (!validNoise.value.title) {
                                     validNoise.value.title =
                                         soundsList.any { sound -> sound.title == title.value }
@@ -97,9 +103,11 @@ fun AddNoise(
                         )
                     }
                     TextField(
-                        value = currentSound?.value?.description ?: "description",
-                        onValueChange = { description.value = it },
-                        label = { description.value },
+                        value = description.value,
+                        onValueChange = {
+                            description.value = it
+                        },
+                        label = { "description" },
                         placeholder = { Text("What makes your Noise special") },
                         singleLine = false,
                         modifier = Modifier
