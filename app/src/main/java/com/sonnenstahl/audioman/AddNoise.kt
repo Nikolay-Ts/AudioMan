@@ -24,7 +24,7 @@ import androidx.compose.ui.window.Dialog
 import androidx.core.net.toUri
 import com.sonnenstahl.audioman.ui.theme.Teal
 import com.sonnenstahl.audioman.utils.*
-import java.io.File // Important for file handling
+import java.io.File
 
 const val PREFIX: String = "/data/user/0/com.sonnenstahl.audioman/files/"
 
@@ -60,20 +60,18 @@ fun AddNoise(
 
 
     LaunchedEffect(currentSound.value) {
-        // When currentSound changes (e.g., on long-click to edit), update the fields
-        title.value = currentSound.value?.title ?: "" // Set to empty for new, or existing title
-        description.value = currentSound.value?.description ?: "" // Set to empty for new, or existing description
+        title.value = currentSound.value?.title ?: ""
+        description.value = currentSound.value?.description ?: ""
         audioUri.value = currentSound.value?.audioPath?.let { path ->
             if (path.startsWith("android_asset/")) path.toUri() else File(path).toUri()
         }
         imageUri.value = currentSound.value?.imagePath?.let { path ->
             if (path.startsWith("android_asset/")) path.toUri() else File(path).toUri()
         }
-        // Clear validation messages when currentSound changes
         supportTitle.value = ""
         supportAudio.value = ""
         notUnique.value = false
-        validNoise.value = ValidNoise() // Reset validation state
+        validNoise.value = ValidNoise()
     }
 
     if (showDialog) {
@@ -81,14 +79,14 @@ fun AddNoise(
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(600.dp) // Consider making height flexible if content can vary
-                    .padding(16.dp), // This padding is for the Card itself, placing it within the screen
+                    .height(600.dp)
+                    .padding(16.dp),
                 shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface) // Use theme surface color
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
             ) {
                 Column(
-                    modifier = Modifier.fillMaxSize(), // This Column fills the Card's content area
-                    verticalArrangement = Arrangement.SpaceAround, // Changed to SpaceAround for better distribution
+                    modifier = Modifier.fillMaxSize(),
+                    verticalArrangement = Arrangement.SpaceAround,
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
@@ -162,7 +160,6 @@ fun AddNoise(
                                 .fillMaxWidth()
                                 .padding(horizontal = 16.dp),
                             colors = TextFieldDefaults.colors(
-                                // Using Material3 theme colors
                                 unfocusedLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
                                 focusedLabelColor = MaterialTheme.colorScheme.primary,
                                 unfocusedTextColor = MaterialTheme.colorScheme.onSurface,

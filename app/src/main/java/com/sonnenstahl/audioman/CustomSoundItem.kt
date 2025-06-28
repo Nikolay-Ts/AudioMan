@@ -78,6 +78,11 @@ fun CustomSoundItem(
                     saveSound(context, fallBackSound, CURRENT_SOUND_PATH)
                 }
 
+                if (sound == AudioPlayer.getSound()) {
+                    AudioPlayer.pause()
+                    AudioPlayer.setSound(null)
+                }
+
                 soundsList.remove(sound)
                 onSoundRemoved()
                 saveSounds(context, soundsList, SOUNDS_FILE_PATH)

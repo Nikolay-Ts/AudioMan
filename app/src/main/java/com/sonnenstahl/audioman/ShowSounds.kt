@@ -65,14 +65,24 @@ fun SoundItem(sound: Noise, context: Context, isCustom: Boolean = false) {
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             if (isCustom) {
-                Image(
-                    painter = rememberAsyncImagePainter(File(sound.imagePath)),
-                    contentDescription = null,
-                    modifier = Modifier.size(40.dp)
-                )
+                val prefix = sound.imagePath.substring(PREFIX.length)
+
+                if (prefix == DEFAULT_IMAGE_URI || prefix == DEFAULT_LIGHT_IMAGE) {
+                    Image(
+                        rememberAsyncImagePainter(model = "file:///android_asset/$prefix"),
+                        contentDescription = null,
+                        modifier = Modifier.size(40.dp)
+                    )
+                } else {
+                    Image(
+                        painter = rememberAsyncImagePainter(File(sound.imagePath).absolutePath),
+                        contentDescription = null,
+                        modifier = Modifier.size(40.dp)
+                    )
+             }
             } else {
                 val path = when (darkMode) {
-                    true -> DEFAULT_LIGHT_IMAGE
+                    true  -> DEFAULT_LIGHT_IMAGE
                     false -> DEFAULT_IMAGE_URI
                 }
                 Image(
