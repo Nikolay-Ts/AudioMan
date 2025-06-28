@@ -73,16 +73,4 @@ object AudioPlayer {
     fun clearSound() {
         sound = null
     }
-
-    // for the widget app
-    private fun updateWidgetState(context: Context, isPlaying: Boolean, sound: Noise?) {
-        val prefs = context.getSharedPreferences("widget_prefs", Context.MODE_PRIVATE)
-        prefs.edit().apply {
-            putBoolean("isPlaying", isPlaying)
-            putString("title", sound?.title ?: "")
-            putString("description", sound?.description ?: "")
-            putString("coverUri", sound?.imagePath ?: "") // must be a String URI
-            apply()
-        }
-    }
 }

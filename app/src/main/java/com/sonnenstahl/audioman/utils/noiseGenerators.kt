@@ -110,7 +110,7 @@ fun updateGraphData(
     val audioPath = writeWav(samplesState.value, sampleRate, file)
 
     val sound = Noise(
-        id = UUID.randomUUID().toString(),
+        id = "-2",
         title =  "Generated Noise",
         description =  "Noise generated via sliders",
         audioPath = audioPath,

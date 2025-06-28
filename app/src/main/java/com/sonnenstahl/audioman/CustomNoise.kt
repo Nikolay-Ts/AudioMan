@@ -17,6 +17,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.media3.common.util.Log
 import com.sonnenstahl.audioman.ui.theme.Brown
 import com.sonnenstahl.audioman.ui.theme.DarkPlotBackGround
 import com.sonnenstahl.audioman.ui.theme.LightBrown
@@ -161,15 +162,16 @@ fun CustomNoise() {
 
         Spacer(modifier = Modifier.height(32.dp))
 
+        Log.d("CUSTOM Noise", "${isPlaying.value && AudioPlayer.getSound().id == "-2"}")
         AnimatedPause(
-            isPlaying.value,
-            200,
+            isPlaying = (isPlaying.value && AudioPlayer.getSound().id == "-2"),
+            size  = 200,
             modifier = Modifier
                 .size(100.dp)
                 .padding(16.dp)
         ) {
             coroutineScope.launch {
-                if (isPlaying.value) {
+                if (isPlaying.value && AudioPlayer.getSound().id == "-2") {
                     AudioPlayer.pause()
                     isPlaying.value = false
                 } else {
