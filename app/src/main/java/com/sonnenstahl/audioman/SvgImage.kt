@@ -84,11 +84,11 @@ fun renderSvgToBitmap(context: Context, filename: String, scale: Float): Bitmap 
 fun AnimatedPause(
     isPlaying: Boolean,
     size: Int = 64,
+    modifier: Modifier = Modifier, // Changed to have a default value
     onToggle: () -> Unit
 ) {
     var tapped by remember { mutableStateOf(false) }
 
-    // Slight scale effect on toggle (like a bounce)
     val scale by animateFloatAsState(
         targetValue = if (tapped) 1.2f else 1f,
         animationSpec = spring(dampingRatio = 0.4f, stiffness = 300f),
@@ -96,12 +96,12 @@ fun AnimatedPause(
     )
 
     Box(
-        modifier = Modifier
+        modifier = modifier // Use the provided modifier here
             .size(size.dp)
             .scale(scale)
             .clickable(
                 interactionSource = remember { MutableInteractionSource() },
-                indication = null // disables the ripple/rectangle
+                indication = null
             ) {
                 tapped = true
                 onToggle()
@@ -124,7 +124,6 @@ fun AnimatedPause(
             )
         }
     }
-
 
     LaunchedEffect(tapped) {
         if (tapped) {

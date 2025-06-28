@@ -2,18 +2,28 @@ package com.sonnenstahl.audioman
 
 import android.os.Build
 import androidx.annotation.RequiresApi
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.background
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.sonnenstahl.audioman.ui.theme.Brown
+import com.sonnenstahl.audioman.ui.theme.DarkPlotBackGround
+import com.sonnenstahl.audioman.ui.theme.LightBrown
+import com.sonnenstahl.audioman.ui.theme.LightPlotBackGround
 import com.sonnenstahl.audioman.ui.theme.LightTeal
 import com.sonnenstahl.audioman.ui.theme.Pink40
+import com.sonnenstahl.audioman.ui.theme.Pink80
 import com.sonnenstahl.audioman.ui.theme.Teal
 import com.sonnenstahl.audioman.utils.AudioPlayer
 import com.sonnenstahl.audioman.utils.CURRENT_SOUND_PATH
@@ -35,160 +45,173 @@ import java.util.UUID
 @Composable
 fun CustomNoise() {
     val context = LocalContext.current
-
-    var customNoise by remember { mutableStateOf(loadCustomSound(context, CUSTOM_SOUND_PATH)) }
-    var noiseType by remember { mutableStateOf(customNoise?.noiseType ?: "White") }
-    var amplitude by rememberSaveable { mutableFloatStateOf(customNoise?.amplitude ?: 0.5f) }
-    var spectrum by rememberSaveable { mutableFloatStateOf(customNoise?.spectrum ?: 0.5f) }
+    val isDarkTheme = isSystemInDarkTheme()
+    var customNoiseData by remember { mutableStateOf(loadCustomSound(context, CUSTOM_SOUND_PATH) ?: CustomNoise("White", 0.5f, 0.5f, ByteArray(size = 44100 * 2))) }
+    var noiseType by remember { mutableStateOf(customNoiseData.noiseType) }
+    var amplitude by rememberSaveable { mutableFloatStateOf(customNoiseData.amplitude) }
+    var spectrum by rememberSaveable { mutableFloatStateOf(customNoiseData.spectrum) }
     val isPlaying = remember { mutableStateOf(AudioPlayer.isPlaying()) }
-    val previewSamples = remember {
-        mutableStateOf<ByteArray>(customNoise?.samples ?: ByteArray(size = 44100 * 2))
+    val previewSamples = remember { mutableStateOf(customNoiseData.samples) }
+
+    val targetLineColor = remember(noiseType, isDarkTheme) {
+        mutableStateOf(when (noiseType) {
+            "White" -> if (isDarkTheme) Color.LightGray else Color.Gray
+            "Pink"  -> if (isDarkTheme) Pink80 else Pink40
+            "Brown" -> if (isDarkTheme) LightBrown else Brown
+            else   -> Color.Red
+        })
     }
-    val lineColor = remember { mutableStateOf(Color.Red) }
     val coroutineScope = rememberCoroutineScope()
 
-    LaunchedEffect(Unit) {
-        customNoise?.let {
-            lineColor.value = when (noiseType) {
-                "White" -> Color.Gray
-                "Pink"  -> Pink40
-                "Brown" -> Brown
-                else -> Color.White
-            }
-        }
+    LaunchedEffect(noiseType, amplitude, spectrum, previewSamples.value) {
+        customNoiseData = customNoiseData.copy(
+            noiseType = noiseType,
+            amplitude = amplitude,
+            spectrum = spectrum,
+            samples = previewSamples.value
+        )
+    }
+
+    LaunchedEffect(noiseType, amplitude, spectrum, isDarkTheme) { // Add isDarkTheme to dependencies
+        updateGraphData(
+            context,
+            noiseType,
+            amplitude,
+            spectrum,
+            previewSamples,
+            targetLineColor
+        )
     }
 
     Column(
-        modifier = Modifier.fillMaxSize().padding(24.dp).padding(top=5.dp),
-        verticalArrangement = Arrangement.spacedBy(32.dp),
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
+            .padding(horizontal = 24.dp, vertical = 32.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text("Noise Generator", style = MaterialTheme.typography.headlineMedium)
+        Text(
+            "Noise Generator",
+            style = MaterialTheme.typography.headlineMedium.copy(color = MaterialTheme.colorScheme.onBackground),
+            modifier = Modifier.padding(bottom = 24.dp)
+        )
 
         Column(
             modifier = Modifier
-                .fillMaxSize()
-                .padding(15.dp)
-                .padding(vertical = 14.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+                .fillMaxWidth()
+                .weight(1f)
+                .clip(RoundedCornerShape(16.dp))
+                .background(MaterialTheme.colorScheme.surface)
+                .padding(24.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.SpaceAround
         ) {
-            Spacer(modifier = Modifier.weight(1f))
+            FrequencyGraph(
+                samples = previewSamples.value,
+                lineColor = targetLineColor,
+                backgroundColor = if (isDarkTheme) LightPlotBackGround else DarkPlotBackGround,
+                gridColor =  if (isDarkTheme) DarkPlotBackGround else LightPlotBackGround,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(220.dp) // Made graph bigger
+                    .clip(RoundedCornerShape(8.dp))
+                    .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f))
+            )
 
-            FrequencyGraph(samples = previewSamples.value, lineColor = lineColor)
-            Spacer(modifier = Modifier.weight(1f))
+            Spacer(modifier = Modifier.height(24.dp))
 
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.padding(top = 10.dp)
+                horizontalArrangement = Arrangement.SpaceBetween,
+                modifier = Modifier.fillMaxWidth()
             ) {
-                Text("Noise Type: ")
+                Text(
+                    "Noise Type:",
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
                 DropdownMenuBox(
                     options = listOf("White", "Pink", "Brown"),
                     selected = noiseType,
                     onSelectedChange = {
                         noiseType = it
-                        updateGraphData(
-                            context,
-                            noiseType,
-                            amplitude,
-                            spectrum,
-                            previewSamples,
-                            lineColor
-                        )
                     }
                 )
             }
+
+            Spacer(modifier = Modifier.height(24.dp))
 
             SliderWithLabel(
                 "Amplitude", amplitude, 0f..1f,
                 onChange = { amplitude = it },
                 onFinalChange = {
-                    updateGraphData(
-                        context,
-                        noiseType,
-                        amplitude,
-                        spectrum,
-                        previewSamples,
-                        lineColor
-                    )
                 }
             )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
             SliderWithLabel(
                 "Brightness",
                 spectrum, 0f..1f,
                 onChange = { spectrum = it },
                 onFinalChange = {
-                    updateGraphData(
-                        context,
+                }
+            )
+        }
+
+        Spacer(modifier = Modifier.height(32.dp))
+
+        AnimatedPause(
+            isPlaying.value,
+            200,
+            modifier = Modifier
+                .size(100.dp)
+                .padding(16.dp)
+        ) {
+            coroutineScope.launch {
+                if (isPlaying.value) {
+                    AudioPlayer.pause()
+                    isPlaying.value = false
+                } else {
+                    val file = File(context.cacheDir, "generated_noise.wav")
+                    val sampleRate = 44100
+                    val durationSec = 1
+
+                    val newSamples = generateNoiseSamples(
                         noiseType,
                         amplitude,
                         spectrum,
-                        previewSamples,
-                        lineColor
+                        sampleRate,
+                        durationSec
                     )
+                    previewSamples.value = newSamples
+
+                    val path = writeWav(newSamples, sampleRate, file)
+
+                    val sound = Noise(
+                        UUID.randomUUID().toString(),
+                        "Generated Noise",
+                        "Noise generated via sliders",
+                        path
+                    )
+
+                    val updatedCustomNoise = CustomNoise(
+                        noiseType,
+                        amplitude,
+                        spectrum,
+                        newSamples
+                    )
+
+                    saveCustomSound(context, updatedCustomNoise, CUSTOM_SOUND_PATH)
+                    saveSound(context, sound, CURRENT_SOUND_PATH)
+                    AudioPlayer.playAsset(context, sound)
+                    isPlaying.value = true
                 }
-            )
-            AnimatedPause(
-                isPlaying.value,
-                200
-            ) {
-
-                when (isPlaying.value) {
-                    true -> {
-                        AudioPlayer.pause()
-                        isPlaying.value = false
-                    }
-
-                    false -> {
-                        coroutineScope.launch {
-                            lineColor.value = when (noiseType) {
-                                "White" -> Color.Gray
-                                "Pink"  -> Pink40
-                                "Brown" -> Brown
-                                else -> Color.White
-                            }
-                            val file = File(context.cacheDir, "generated_noise.wav")
-                            val sampleRate = 44100
-                            val durationSec = 1
-
-                            val samples =
-                                generateNoiseSamples(
-                                    noiseType,
-                                    amplitude,
-                                    spectrum,
-                                    sampleRate,
-                                    durationSec
-                                )
-
-                            previewSamples.value = samples
-                            val path = writeWav(samples, sampleRate, file)
-
-                            val sound = Noise(
-                                UUID.randomUUID().toString(),
-                                "Generated Noise",
-                                "Noise generated via sliders",
-                                path
-                            )
-
-                            val customNoise = CustomNoise(
-                                noiseType,
-                                amplitude,
-                                spectrum,
-                                samples
-                            )
-
-                            saveCustomSound(context, customNoise, CUSTOM_SOUND_PATH)
-                            saveSound(context, sound, CURRENT_SOUND_PATH)
-                            AudioPlayer.playAsset(context, sound)
-                        }
-                        AudioPlayer.play()
-                        isPlaying.value = true
-                    }
             }
-        }
         }
     }
 }
+
 
 @Composable
 fun SliderWithLabel(
@@ -198,23 +221,26 @@ fun SliderWithLabel(
     onChange: (Float) -> Unit,
     onFinalChange: () -> Unit
 ) {
-    Column(modifier = Modifier.padding(top=10.dp).padding(bottom = 5.dp)) {
+    Column(modifier = Modifier.fillMaxWidth()) {
         Text(
             "$label: ${"%.2f".format(value)}",
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.onSurface,
             modifier = Modifier
-                .align(Alignment.CenterHorizontally)
-                .padding(bottom = 5.dp)
+                .align(Alignment.Start)
+                .padding(bottom = 8.dp)
         )
         Slider(
             value = value,
             onValueChange = onChange,
-            onValueChangeFinished =  onFinalChange,
+            onValueChangeFinished = onFinalChange,
             valueRange = range,
             colors = SliderDefaults.colors(
                 thumbColor = Teal,
                 activeTrackColor = LightTeal,
-                inactiveTrackColor = Color.White
-            )
+                inactiveTrackColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f)
+            ),
+            modifier = Modifier.fillMaxWidth()
         )
     }
 }
@@ -230,16 +256,21 @@ fun DropdownMenuBox(
 
     Box {
         Button(
-            colors =  ButtonDefaults.buttonColors(Teal),
-            onClick = { expanded = true }) {
-            Text(selected, color = Color.White)
+            colors = ButtonDefaults.buttonColors(containerColor = LightTeal),
+            onClick = { expanded = true },
+            modifier = Modifier.height(48.dp)
+        ) {
+            Text(selected, color = Color.White, style = MaterialTheme.typography.bodyLarge)
         }
         DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
             options.forEach {
-                DropdownMenuItem(text = { Text(it) }, onClick = {
-                    onSelectedChange(it)
-                    expanded = false
-                })
+                DropdownMenuItem(
+                    text = { Text(it, color = MaterialTheme.colorScheme.onSurface) },
+                    onClick = {
+                        onSelectedChange(it)
+                        expanded = false
+                    }
+                )
             }
         }
     }

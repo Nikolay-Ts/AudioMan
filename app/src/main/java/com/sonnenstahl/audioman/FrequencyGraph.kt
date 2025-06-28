@@ -15,7 +15,10 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun FrequencyGraph(
     samples: ByteArray,
-    lineColor: MutableState<Color>
+    lineColor: MutableState<Color>,
+    backgroundColor: Color,
+    gridColor: Color,
+    modifier: Modifier
 ) {
     val sampleCount = samples.size / 2
     val points = IntArray(sampleCount) {
@@ -29,17 +32,13 @@ fun FrequencyGraph(
     val plotSize = configuration.screenWidthDp * 0.75f
 
     Canvas(
-        modifier = Modifier
-            .height(plotSize.dp)
-            .width(plotSize.dp)
-            .padding(bottom = 8.dp)
+        modifier = modifier
     ) {
         val step = size.width / sampleCount
         val horizontalLines = 4
         val verticalLines = 8
 
-        // background
-        drawRect(color = Color(0xFFF8F8F8)) // Light gray/white
+        drawRect(color = backgroundColor)
 
         // horizontal grid lines
         for (i in 0..horizontalLines) {
@@ -56,7 +55,7 @@ fun FrequencyGraph(
         for (i in 0..verticalLines) {
             val x = i * size.width / verticalLines
             drawLine(
-                color = Color.LightGray,
+                color = gridColor,
                 start = Offset(x, 0f),
                 end = Offset(x, size.height),
                 strokeWidth = 0.5f
