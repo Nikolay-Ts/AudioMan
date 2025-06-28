@@ -4,8 +4,8 @@ import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.snapshots.SnapshotStateList
@@ -14,25 +14,22 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import androidx.media3.common.util.Log
 import com.sonnenstahl.audioman.utils.*
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun Library() {
-    val scrollState = rememberScrollState()
     val context = LocalContext.current
     val popUpDialog = remember { mutableStateOf(false) }
     val customSounds = remember { mutableStateListOf<Noise>() }
     val currentNoise = remember { mutableStateOf<Noise?>(null) }
-    val recomposeCounter = remember { mutableIntStateOf(0) }
+    val recomposeCounter = remember { mutableIntStateOf(0) } // Used to trigger data reload
 
     LaunchedEffect(recomposeCounter.intValue) {
         val loaded = loadSounds(context, SOUNDS_FILE_PATH)
         customSounds.clear()
         customSounds.addAll(loaded)
     }
-
 
     AddNoise(
         showDialog = popUpDialog.value,
@@ -41,33 +38,46 @@ fun Library() {
     ) {
         currentNoise.value = null
         popUpDialog.value = false
+        recomposeCounter.intValue++
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
-        Column(
+        LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(16.dp)
-                .verticalScroll(scrollState),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
+                .padding(horizontal = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            item {
+                Text(
+                    text = "Sound Library",
+                    style = MaterialTheme.typography.titleLarge,
+                    modifier = Modifier.padding(vertical = 8.dp)
+                )
+            }
 
-            Text(
-                text = "Sound Library",
-                style = MaterialTheme.typography.titleLarge,
-                modifier = Modifier.padding(bottom = 8.dp)
-            )
+            items(defaultSounds) { sound ->
+                SoundItem(sound = sound, context = context, isCustom = false)
+            }
 
-            ShowSounds(defaultSounds, context)
+            items(
+                items = customSounds,
+                key = { sound -> sound.id }
+            ) { sound ->
+                CustomSoundItem(
+                    sound = sound,
+                    soundsList = customSounds,
+                    currentSound = currentNoise,
+                    onSoundRemoved = { recomposeCounter.intValue++ },
+                    openDialogTrigger = popUpDialog,
+                    context = context
+                )
+            }
 
-            ShowCustomSounds(
-                sounds = customSounds,
-                currentSound = currentNoise,
-                count = recomposeCounter,
-                openDialogTrigger = popUpDialog,
-                context = context
-            )
+            item {
+                Spacer(modifier = Modifier.height(80.dp))
+            }
         }
 
         OutlinedButton(
