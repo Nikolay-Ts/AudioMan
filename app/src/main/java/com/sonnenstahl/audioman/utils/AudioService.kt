@@ -44,7 +44,7 @@ class AudioService : MediaSessionService() {
         instance = null
     }
 
-    fun getPlayer(): ExoPlayer = player
+
 
     companion object {
         var instance: AudioService? = null
@@ -72,4 +72,6 @@ class AudioService : MediaSessionService() {
             .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
             .build()
     }
+
+
 }

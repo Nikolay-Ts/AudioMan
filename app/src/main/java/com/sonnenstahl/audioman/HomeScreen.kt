@@ -1,11 +1,16 @@
 package com.sonnenstahl.audioman
 
+import android.content.Context
 import android.graphics.Bitmap
 import java.io.File
 import android.graphics.BitmapFactory
 import android.graphics.Matrix
 import android.media.ExifInterface
 import android.os.Build
+import android.os.VibrationEffect
+import android.os.Vibrator
+import android.os.VibratorManager
+import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.Image
@@ -24,6 +29,7 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.res.painterResource
+import androidx.media3.common.util.Log
 import androidx.media3.common.util.UnstableApi
 import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
@@ -33,6 +39,8 @@ import com.sonnenstahl.audioman.utils.AudioPlayer
 import com.sonnenstahl.audioman.utils.CURRENT_SOUND_PATH
 import com.sonnenstahl.audioman.utils.DEFAULT_IMAGE_URI
 import com.sonnenstahl.audioman.utils.DEFAULT_LIGHT_IMAGE
+import com.sonnenstahl.audioman.utils.fallBackSound
+import com.sonnenstahl.audioman.utils.loadCustomSound
 import com.sonnenstahl.audioman.utils.loadSound
 
 const val PLAYING_IMAGE_SIZE: Int = 250
@@ -46,12 +54,7 @@ fun HomeScreen(navController: NavController) {
     val currentlyPlaying = remember { mutableStateOf(AudioPlayer.getSound()) }
     val volume = rememberSaveable { mutableStateOf(AudioPlayer.getVolume()) }
     var imagePath by remember { mutableStateOf(DEFAULT_IMAGE_URI) }
-
-    LaunchedEffect(Unit) {
-        AudioPlayer.initialize(context)
-        AudioPlayer.setSound(loadSound(context, CURRENT_SOUND_PATH))
-        currentlyPlaying.value = AudioPlayer.getSound()
-    }
+    val currentSound = remember { mutableStateOf(loadSound(context, CURRENT_SOUND_PATH)) }
 
     val imageSize by animateDpAsState(
         targetValue = if (isPlaying.value) PLAYING_IMAGE_SIZE.dp else PAUSED_IMAGE_SIZE.dp,
@@ -65,7 +68,6 @@ fun HomeScreen(navController: NavController) {
     }
 
     val imageFile = File(imagePath)
-
     val rotatedBitmap by produceState<Bitmap?>(initialValue = null, key1 = imagePath) {
         value = runCatching {
             val originalBitmap = BitmapFactory.decodeFile(imageFile.absolutePath)
@@ -85,6 +87,15 @@ fun HomeScreen(navController: NavController) {
             context.assets.open(imagePath).use { BitmapFactory.decodeStream(it) }
         }.getOrNull()
     } else null
+
+    // initialise the player
+    LaunchedEffect(Unit) {
+        AudioPlayer.initialize(context)
+        if (currentSound.value != null ){
+            AudioPlayer.playAsset(context,currentSound.value!!)
+            AudioPlayer.pause()
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -160,7 +171,17 @@ fun HomeScreen(navController: NavController) {
                 Slider(
                     value = volume.value ?: 0.5f,
                     onValueChange = { volume.value = it },
-                    onValueChangeFinished = { AudioPlayer.setVolume(volume.value ?: 0.5f) },
+                    onValueChangeFinished = {
+                        AudioPlayer.setVolume(volume.value ?: 0.5f)
+                        if (volume.value == 1.0f || volume.value == 0.0f) {
+                            val vibrator = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                                (context.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager).defaultVibrator
+                            } else {
+                                context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+                            }
+                            vibrator.vibrate(VibrationEffect.createOneShot(350, VibrationEffect.DEFAULT_AMPLITUDE))
+                        }
+                    },
                     valueRange = 0f..1f,
                     modifier = Modifier
                         .weight(3f)
@@ -183,6 +204,18 @@ fun HomeScreen(navController: NavController) {
             Spacer(modifier = Modifier.height(10.dp))
 
             AnimatedPause(isPlaying.value) {
+                if (currentlyPlaying.value.id == "-1") { // fallback id
+                    val vibrator = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                        (context.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager).defaultVibrator
+                    } else {
+                        context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+                    }
+                    vibrator.vibrate(VibrationEffect.createOneShot(350, VibrationEffect.DEFAULT_AMPLITUDE))
+
+                    Toast.makeText(context, "Choose a sound first!", Toast.LENGTH_SHORT).show()
+                    return@AnimatedPause
+                }
+
                 if (isPlaying.value) {
                     AudioPlayer.pause()
                     isPlaying.value = false

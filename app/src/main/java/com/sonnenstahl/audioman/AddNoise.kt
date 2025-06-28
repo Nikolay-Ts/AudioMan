@@ -26,7 +26,6 @@ import com.sonnenstahl.audioman.ui.theme.Teal
 import com.sonnenstahl.audioman.utils.*
 import java.io.File
 
-const val PREFIX: String = "/data/user/0/com.sonnenstahl.audioman/files/"
 
 @Composable
 fun AddNoise(

@@ -44,6 +44,8 @@ import coil.compose.rememberAsyncImagePainter
 import com.sonnenstahl.audioman.ui.theme.Teal
 import com.sonnenstahl.audioman.utils.AudioPlayer
 import com.sonnenstahl.audioman.utils.CURRENT_SOUND_PATH
+import com.sonnenstahl.audioman.utils.DEFAULT_IMAGE_URI
+import com.sonnenstahl.audioman.utils.DEFAULT_LIGHT_IMAGE
 import com.sonnenstahl.audioman.utils.Noise
 import com.sonnenstahl.audioman.utils.SOUNDS_FILE_PATH
 import com.sonnenstahl.audioman.utils.fallBackSound
@@ -72,15 +74,12 @@ fun CustomSoundItem(
     val dismissState = rememberDismissState(
         confirmStateChange = {
             if (it == DismissValue.DismissedToStart) {
-                if (sound == AudioPlayer.getSound()) {
+                val isCurrentlyPlayingDismissed = sound.id == AudioPlayer.getSound().id
+
+                if (isCurrentlyPlayingDismissed) {
                     AudioPlayer.pause()
                     AudioPlayer.clearSound()
                     saveSound(context, fallBackSound, CURRENT_SOUND_PATH)
-                }
-
-                if (sound == AudioPlayer.getSound()) {
-                    AudioPlayer.pause()
-                    AudioPlayer.setSound(null)
                 }
 
                 soundsList.remove(sound)
@@ -123,7 +122,12 @@ fun CustomSoundItem(
                             } else {
                                 context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
                             }
-                            vibrator.vibrate(VibrationEffect.createOneShot(150, VibrationEffect.DEFAULT_AMPLITUDE))
+                            vibrator.vibrate(
+                                VibrationEffect.createOneShot(
+                                    150,
+                                    VibrationEffect.DEFAULT_AMPLITUDE
+                                )
+                            )
 
                             currentSound.value = sound
                             openDialogTrigger.value = true
@@ -135,8 +139,14 @@ fun CustomSoundItem(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
+                    val imageModel = when (sound.imagePath) {
+                        "android_asset/default_white.png" -> "file:///android_asset/$DEFAULT_LIGHT_IMAGE"
+                        "android_asset/default_white.png" -> "file:///android_asset/$DEFAULT_IMAGE_URI"
+                        else -> File(sound.imagePath).absolutePath
+                    }
+
                     Image(
-                        painter = rememberAsyncImagePainter(File(sound.imagePath)),
+                        painter = rememberAsyncImagePainter(model = imageModel),
                         contentDescription = null,
                         modifier = Modifier.size(40.dp)
                     )

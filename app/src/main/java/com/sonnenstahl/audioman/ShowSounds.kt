@@ -17,7 +17,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -65,21 +64,17 @@ fun SoundItem(sound: Noise, context: Context, isCustom: Boolean = false) {
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             if (isCustom) {
-                val prefix = sound.imagePath.substring(PREFIX.length)
 
-                if (prefix == DEFAULT_IMAGE_URI || prefix == DEFAULT_LIGHT_IMAGE) {
-                    Image(
-                        rememberAsyncImagePainter(model = "file:///android_asset/$prefix"),
-                        contentDescription = null,
-                        modifier = Modifier.size(40.dp)
-                    )
+                val imageModel = if (DEFAULT_LIGHT_IMAGE in sound.imagePath || DEFAULT_IMAGE_URI in sound.imagePath ) {
+                    "file:///android_asset/$DEFAULT_LIGHT_IMAGE}"
                 } else {
-                    Image(
-                        painter = rememberAsyncImagePainter(File(sound.imagePath).absolutePath),
-                        contentDescription = null,
-                        modifier = Modifier.size(40.dp)
-                    )
-             }
+                    File(sound.imagePath).absolutePath
+                }
+                Image(
+                    painter = rememberAsyncImagePainter(imageModel),
+                    contentDescription = null,
+                    modifier = Modifier.size(40.dp)
+                )
             } else {
                 val path = when (darkMode) {
                     true  -> DEFAULT_LIGHT_IMAGE

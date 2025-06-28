@@ -57,7 +57,6 @@ fun saveSounds(
         val file = File(context.filesDir, filepath)
         file.writeText(json)
     } catch (e: Exception) {
-        Log.d("MEOW", e.toString())
     }
 }
 
@@ -82,7 +81,6 @@ fun saveSound(
         val file = File(context.filesDir, filepath)
         file.writeText(json)
     } catch (e: Exception) {
-        Log.d("MEOW", e.toString())
     }
 }
 
@@ -107,7 +105,6 @@ fun saveCustomSound(
         val file = File(context.filesDir, filepath)
         file.writeText(json)
     } catch (e: Exception) {
-        Log.d("MEOW", e.toString())
     }
 }
 

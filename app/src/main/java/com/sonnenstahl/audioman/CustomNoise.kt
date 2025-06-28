@@ -51,8 +51,8 @@ fun CustomNoise() {
     var noiseType by remember { mutableStateOf(customNoiseData.noiseType) }
     var amplitude by rememberSaveable { mutableFloatStateOf(customNoiseData.amplitude) }
     var spectrum by rememberSaveable { mutableFloatStateOf(customNoiseData.spectrum) }
-    val isPlaying = remember { mutableStateOf(AudioPlayer.isPlaying()) }
     val previewSamples = remember { mutableStateOf(customNoiseData.samples) }
+    val isPlaying = remember { mutableStateOf(AudioPlayer.isPlaying()) }
 
     val targetLineColor = remember(noiseType, isDarkTheme) {
         mutableStateOf(when (noiseType) {
@@ -73,7 +73,7 @@ fun CustomNoise() {
         )
     }
 
-    LaunchedEffect(noiseType, amplitude, spectrum, isDarkTheme) { // Add isDarkTheme to dependencies
+    LaunchedEffect(noiseType, amplitude, spectrum, isDarkTheme) {
         updateGraphData(
             context,
             noiseType,
@@ -114,7 +114,7 @@ fun CustomNoise() {
                 gridColor =  if (isDarkTheme) DarkPlotBackGround else LightPlotBackGround,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(220.dp) // Made graph bigger
+                    .height(220.dp)
                     .clip(RoundedCornerShape(8.dp))
                     .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f))
             )
@@ -162,16 +162,15 @@ fun CustomNoise() {
 
         Spacer(modifier = Modifier.height(32.dp))
 
-        Log.d("CUSTOM Noise", "${isPlaying.value && AudioPlayer.getSound().id == "-2"}")
         AnimatedPause(
-            isPlaying = (isPlaying.value && AudioPlayer.getSound().id == "-2"),
+            isPlaying = isPlaying.value,
             size  = 200,
             modifier = Modifier
                 .size(100.dp)
                 .padding(16.dp)
         ) {
             coroutineScope.launch {
-                if (isPlaying.value && AudioPlayer.getSound().id == "-2") {
+                if (isPlaying.value) {
                     AudioPlayer.pause()
                     isPlaying.value = false
                 } else {
@@ -191,7 +190,7 @@ fun CustomNoise() {
                     val path = writeWav(newSamples, sampleRate, file)
 
                     val sound = Noise(
-                        UUID.randomUUID().toString(),
+                        "-2",
                         "Generated Noise",
                         "Noise generated via sliders",
                         path
@@ -204,15 +203,18 @@ fun CustomNoise() {
                         newSamples
                     )
 
+                    isPlaying.value = true
+
                     saveCustomSound(context, updatedCustomNoise, CUSTOM_SOUND_PATH)
                     saveSound(context, sound, CURRENT_SOUND_PATH)
                     AudioPlayer.playAsset(context, sound)
-                    isPlaying.value = true
                 }
             }
         }
     }
 }
+
+
 
 
 @Composable
