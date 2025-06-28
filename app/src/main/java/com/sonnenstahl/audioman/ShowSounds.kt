@@ -48,7 +48,7 @@ fun SoundItem(sound: Noise, context: Context, isCustom: Boolean = false) {
     Box(
         modifier = Modifier
             .fillMaxWidth(0.95f)
-            .background(LightTeal, shape = RoundedCornerShape(12.dp))
+            .background(Teal, shape = RoundedCornerShape(12.dp))
             .border(
                 width = 1.dp,
                 color = borderColor,
