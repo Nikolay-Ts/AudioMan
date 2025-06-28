@@ -91,10 +91,7 @@ fun HomeScreen(navController: NavController) {
     // initialise the player
     LaunchedEffect(Unit) {
         AudioPlayer.initialize(context)
-        if (currentSound.value != null ){
-            AudioPlayer.playAsset(context,currentSound.value!!)
-            AudioPlayer.pause()
-        }
+        currentSound.value = loadSound(context, CURRENT_SOUND_PATH)
     }
 
     Column(

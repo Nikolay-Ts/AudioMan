@@ -44,7 +44,7 @@ class AudioService : MediaSessionService() {
         instance = null
     }
 
-
+    fun getPlayer(): ExoPlayer = player
 
     companion object {
         var instance: AudioService? = null
