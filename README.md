@@ -25,27 +25,31 @@ The Library is where the user can see all of their tracks including the followin
 
 Audioman Also allows the user to upload their own `track`, give it a unique name and bring it to life with its own `track cover`. 
 
+<p align="center">
 <div style="display: flex; justify-content: center; gap: 20px; padding: 10px">
   <img src="./app/src/main/assets/library.jpg" alt="dog-play" width="150"/>
 </div>
+</p>
 
 User by swiping and long pressing users can eddit their track or delete and remove it from the library if they no longer feel the vibe.
-
+<p align="center">
 <div style="display: flex; justify-content: center; gap: 20px; padding: 10px">
   <img src="./app/src/main/assets/delete-track.jpg" alt="dog-play" width="150"/>
   <img src="./app/src/main/assets/edit-track.jpg" alt="dog-pause" width="150"/>
 </div>
-
+</p>
 ## Custom, Real Time, White Noise
 
 AudioMan aslo has options for users that prefer track that are calmer and more predictable. AudioMan has designed the **white noise** section for those users. 
 
 Users can chose to play either a white, <span style="color: pink;">pink</span> or  <span style="color: burlywood;">brown</span> noises. The users can also chose the amplitude and frequency to customise the type of noise the to the user's exact need and mood.
 
+<p align="center">
 <div style="display: flex; justify-content: center; gap: 20px; padding: 10px">
   <img src="./app/src/main/assets/brown-noise.jpg" alt="dog-play" width="150"/>
   <img src="./app/src/main/assets/pink-noise.jpg" alt="dog-pause" width="150"/>
 </div>
+</p>
 
 The white noise along side the image are generated in real time to display the actual frequency that the user is currently listenting to.
 
