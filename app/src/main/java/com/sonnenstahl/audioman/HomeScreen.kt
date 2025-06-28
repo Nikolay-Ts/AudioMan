@@ -50,6 +50,7 @@ const val PAUSED_IMAGE_SIZE: Int = (PLAYING_IMAGE_SIZE * 0.75).toInt()
 @Composable
 fun HomeScreen(navController: NavController) {
     val context = LocalContext.current
+    val darkMode = isSystemInDarkTheme()
     val isPlaying = remember { mutableStateOf(AudioPlayer.isPlaying()) }
     val currentlyPlaying = remember { mutableStateOf(AudioPlayer.getSound()) }
     val volume = rememberSaveable { mutableStateOf(AudioPlayer.getVolume()) }
@@ -62,7 +63,7 @@ fun HomeScreen(navController: NavController) {
     )
 
     imagePath = if (currentlyPlaying.value.imagePath == DEFAULT_IMAGE_URI || currentlyPlaying.value.imagePath == DEFAULT_LIGHT_IMAGE) {
-        if (isSystemInDarkTheme()) DEFAULT_LIGHT_IMAGE else DEFAULT_IMAGE_URI
+        if (darkMode) DEFAULT_LIGHT_IMAGE else DEFAULT_IMAGE_URI
     } else {
         currentlyPlaying.value.imagePath
     }
@@ -116,18 +117,34 @@ fun HomeScreen(navController: NavController) {
             contentAlignment = Alignment.Center
         ) {
             val bitmap = rotatedBitmap ?: assetBitmap
-            val isDefault = imagePath == DEFAULT_IMAGE_URI || imagePath == DEFAULT_LIGHT_IMAGE
+            val isDefault = when (imagePath) {
+                "android_asset/default_white.png",
+                "android_asset/default_white.png",
+                DEFAULT_LIGHT_IMAGE,
+                DEFAULT_IMAGE_URI   -> true
+                else -> false
+            }
 
-            if (bitmap != null) {
+            if (isDefault) {
+                val path = when (darkMode) {
+                    true  -> DEFAULT_LIGHT_IMAGE
+                    false -> DEFAULT_IMAGE_URI
+                }
+                Image(
+                    rememberAsyncImagePainter(model = "file:///android_asset/$path"),
+                    contentDescription = null,
+                    modifier = Modifier
+                        .size(imageSize)
+                        .clip(RoundedCornerShape(16.dp))
+                )
+            } else if (bitmap != null) {
                 Image(
                     bitmap = bitmap.asImageBitmap(),
                     contentDescription = "Album Art",
                     modifier = Modifier
                         .size(imageSize)
+                        .border(2.dp, Color.Gray, RoundedCornerShape(16.dp))
                         .clip(RoundedCornerShape(16.dp))
-                        .then(
-                            if (!isDefault) Modifier.border(2.dp, Color.Gray, RoundedCornerShape(16.dp)) else Modifier
-                        )
                 )
             }
         }
