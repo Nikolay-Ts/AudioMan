@@ -34,6 +34,7 @@ User by swiping and long pressing users can eddit their track or delete and remo
   <img src="./app/src/main/assets/delete-track.jpg" alt="dog-play" width="150"/>
   <img src="./app/src/main/assets/edit-track.jpg" alt="dog-pause" width="150"/>
 </p>
+
 ## Custom, Real Time, White Noise
 
 AudioMan aslo has options for users that prefer track that are calmer and more predictable. AudioMan has designed the **white noise** section for those users. 
