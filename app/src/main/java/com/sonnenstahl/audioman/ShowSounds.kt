@@ -25,6 +25,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import coil.compose.rememberAsyncImagePainter
+import com.sonnenstahl.audioman.ui.theme.LightTeal
 import com.sonnenstahl.audioman.ui.theme.Teal
 import com.sonnenstahl.audioman.utils.AudioPlayer
 import com.sonnenstahl.audioman.utils.CURRENT_SOUND_PATH
@@ -47,7 +48,7 @@ fun SoundItem(sound: Noise, context: Context, isCustom: Boolean = false) {
     Box(
         modifier = Modifier
             .fillMaxWidth(0.95f)
-            .background(Teal, shape = RoundedCornerShape(12.dp))
+            .background(LightTeal, shape = RoundedCornerShape(12.dp))
             .border(
                 width = 1.dp,
                 color = borderColor,

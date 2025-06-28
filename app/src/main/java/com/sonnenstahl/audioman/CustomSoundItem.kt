@@ -41,6 +41,7 @@ import androidx.compose.ui.unit.dp
 import androidx.media3.common.util.Log
 import androidx.media3.common.util.UnstableApi
 import coil.compose.rememberAsyncImagePainter
+import com.sonnenstahl.audioman.ui.theme.LightTeal
 import com.sonnenstahl.audioman.ui.theme.Teal
 import com.sonnenstahl.audioman.utils.AudioPlayer
 import com.sonnenstahl.audioman.utils.CURRENT_SOUND_PATH
@@ -70,6 +71,7 @@ fun CustomSoundItem(
         true -> Color.LightGray
         false -> Color.Black
     }
+
 
     val dismissState = rememberDismissState(
         confirmStateChange = {
@@ -104,7 +106,7 @@ fun CustomSoundItem(
             Box(
                 modifier = Modifier
                     .fillMaxWidth(0.95f)
-                    .background(Teal, shape = RoundedCornerShape(12.dp))
+                    .background(LightTeal, shape = RoundedCornerShape(12.dp))
                     .border(
                         width = 1.dp,
                         color = borderColor,
@@ -140,8 +142,8 @@ fun CustomSoundItem(
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     val imageModel = when (sound.imagePath) {
-                        "android_asset/default_white.png" -> "file:///android_asset/$DEFAULT_LIGHT_IMAGE"
-                        "android_asset/default_white.png" -> "file:///android_asset/$DEFAULT_IMAGE_URI"
+                        "android_asset/default_white.png","android_asset/default_white.png"
+                             -> if (darkMode) "file:///android_asset/$DEFAULT_LIGHT_IMAGE" else "file:///android_asset/$DEFAULT_IMAGE_URI"
                         else -> File(sound.imagePath).absolutePath
                     }
 

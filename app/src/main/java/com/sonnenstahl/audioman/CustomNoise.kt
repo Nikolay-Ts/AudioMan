@@ -2,8 +2,6 @@ package com.sonnenstahl.audioman
 
 import android.os.Build
 import androidx.annotation.RequiresApi
-import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
@@ -18,6 +16,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.media3.common.util.Log
+import com.sonnenstahl.audioman.ui.theme.AudioManTheme
 import com.sonnenstahl.audioman.ui.theme.Brown
 import com.sonnenstahl.audioman.ui.theme.DarkPlotBackGround
 import com.sonnenstahl.audioman.ui.theme.LightBrown
@@ -37,23 +36,25 @@ import com.sonnenstahl.audioman.utils.saveCustomSound
 import com.sonnenstahl.audioman.utils.saveSound
 import com.sonnenstahl.audioman.utils.updateGraphData
 import com.sonnenstahl.audioman.utils.writeWav
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.io.File
-import java.util.UUID
 
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun CustomNoise() {
     val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
     val isDarkTheme = isSystemInDarkTheme()
+
     var customNoiseData by remember { mutableStateOf(loadCustomSound(context, CUSTOM_SOUND_PATH) ?: CustomNoise("White", 0.5f, 0.5f, ByteArray(size = 44100 * 2))) }
     var noiseType by remember { mutableStateOf(customNoiseData.noiseType) }
     var amplitude by rememberSaveable { mutableFloatStateOf(customNoiseData.amplitude) }
     var spectrum by rememberSaveable { mutableFloatStateOf(customNoiseData.spectrum) }
     val previewSamples = remember { mutableStateOf(customNoiseData.samples) }
-    val isPlaying = remember { mutableStateOf(AudioPlayer.isPlaying()) }
-
+    val isPlaying      = remember { mutableStateOf(AudioPlayer.isPlaying()) }
+    val currentSound  = remember { mutableStateOf(AudioPlayer.getSound()) }
     val targetLineColor = remember(noiseType, isDarkTheme) {
         mutableStateOf(when (noiseType) {
             "White" -> if (isDarkTheme) Color.LightGray else Color.Gray
@@ -62,18 +63,22 @@ fun CustomNoise() {
             else   -> Color.Red
         })
     }
-    val coroutineScope = rememberCoroutineScope()
 
-    LaunchedEffect(noiseType, amplitude, spectrum, previewSamples.value) {
+    LaunchedEffect(noiseType, amplitude, spectrum) {
+        val newSamples = generateNoiseSamples(
+            noiseType,
+            amplitude,
+            spectrum,
+            44100,
+            1
+        )
+        previewSamples.value = newSamples
         customNoiseData = customNoiseData.copy(
             noiseType = noiseType,
             amplitude = amplitude,
             spectrum = spectrum,
-            samples = previewSamples.value
+            samples = newSamples
         )
-    }
-
-    LaunchedEffect(noiseType, amplitude, spectrum, isDarkTheme) {
         updateGraphData(
             context,
             noiseType,
@@ -145,8 +150,7 @@ fun CustomNoise() {
             SliderWithLabel(
                 "Amplitude", amplitude, 0f..1f,
                 onChange = { amplitude = it },
-                onFinalChange = {
-                }
+                onFinalChange = { }
             )
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -155,13 +159,13 @@ fun CustomNoise() {
                 "Brightness",
                 spectrum, 0f..1f,
                 onChange = { spectrum = it },
-                onFinalChange = {
-                }
+                onFinalChange = { }
             )
         }
 
         Spacer(modifier = Modifier.height(32.dp))
 
+        // This is the ONLY place where playback should be initiated or paused
         AnimatedPause(
             isPlaying = isPlaying.value,
             size  = 200,
@@ -170,10 +174,14 @@ fun CustomNoise() {
                 .padding(16.dp)
         ) {
             coroutineScope.launch {
-                if (isPlaying.value) {
+                if (currentSound.value.id == "-2" && isPlaying.value ) {
+                    AudioPlayer.pause()
+                    isPlaying.value = false
+                } else if (isPlaying.value == true) {
                     AudioPlayer.pause()
                     isPlaying.value = false
                 } else {
+                    isPlaying.value = true
                     val file = File(context.cacheDir, "generated_noise.wav")
                     val sampleRate = 44100
                     val durationSec = 1
@@ -189,7 +197,7 @@ fun CustomNoise() {
 
                     val path = writeWav(newSamples, sampleRate, file)
 
-                    val sound = Noise(
+                    val generatedNoise = Noise(
                         "-2",
                         "Generated Noise",
                         "Noise generated via sliders",
@@ -202,19 +210,16 @@ fun CustomNoise() {
                         spectrum,
                         newSamples
                     )
-
-                    isPlaying.value = true
-
                     saveCustomSound(context, updatedCustomNoise, CUSTOM_SOUND_PATH)
-                    saveSound(context, sound, CURRENT_SOUND_PATH)
-                    AudioPlayer.playAsset(context, sound)
+                    saveSound(context, generatedNoise, CURRENT_SOUND_PATH)
+
+                    AudioPlayer.initialize(context)
+                    AudioPlayer.playAsset(context, generatedNoise)
                 }
             }
         }
     }
 }
-
-
 
 
 @Composable

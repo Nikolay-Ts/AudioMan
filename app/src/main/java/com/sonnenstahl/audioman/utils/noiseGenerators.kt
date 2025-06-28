@@ -124,6 +124,4 @@ fun updateGraphData(
     )
 
     saveCustomSound(context, customNoise, CUSTOM_SOUND_PATH)
-    saveSound(context, sound, CURRENT_SOUND_PATH)
-    AudioPlayer.playAsset(context, sound)
 }
