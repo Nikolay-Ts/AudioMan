@@ -3,10 +3,19 @@ package com.sonnenstahl.audioman.utils
 import android.content.Context
 import android.content.Intent
 import android.os.Build
+import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.core.net.toUri
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 
 object AudioPlayer {
     @RequiresApi(Build.VERSION_CODES.O)
@@ -17,39 +26,64 @@ object AudioPlayer {
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
-    fun playAsset(
+    suspend fun playAsset(
         context: Context,
         sound: Noise,
     ) {
-        initialize(context)
+        mutex.withLock {
+            initialize(context)
 
-        val mediaItem =
-            if (!sound.audioPath.contains("/") && !sound.audioPath.startsWith("content:")) {
-                // asset sound
-                val assetUri = "asset:///${sound.audioPath}".toUri()
-                MediaItem.Builder().setUri(assetUri).build()
-            } else {
-                // external file (file:// or content://)
-                MediaItem.fromUri(sound.audioPath)
+            val mediaItem =
+                if (!sound.audioPath.contains("/") && !sound.audioPath.startsWith("content:")) {
+                    // asset sound
+                    val assetUri = "asset:///${sound.audioPath}".toUri()
+                    MediaItem.Builder().setUri(assetUri).build()
+                } else {
+                    // external file (file:// or content://)
+                    MediaItem.fromUri(sound.audioPath)
+                }
+
+            getPlayer()?.apply {
+                setMediaItem(mediaItem)
+                repeatMode = Player.REPEAT_MODE_ONE
+                volume = 0.5f
+                prepare()
+                play()
             }
 
-        getPlayer()?.apply {
-            setMediaItem(mediaItem)
-            repeatMode = Player.REPEAT_MODE_ONE
-            volume = 0.5f
-            prepare()
-            play()
+            this.sound = sound
         }
-
-        this.sound = sound
     }
 
-    fun pause() {
-        getPlayer()?.pause()
+    @RequiresApi(Build.VERSION_CODES.O)
+    fun countDown(
+        context: Context,
+        timeMilli: Long,
+    ) {
+        sleepTimeMilli = timeMilli
+        timerCoroutine.launch {
+            while (sleepTimeMilli != 0L) {
+                delay(1000)
+                sleepTimeMilli -= 1000L
+                Log.d("TIME-LEFT", "$sleepTimeMilli")
+            }
+            mutex.withLock {
+                getPlayer()?.pause()
+            }
+        }
+        timerCoroutine.cancel()
     }
 
-    fun play() {
-        getPlayer()?.play()
+    suspend fun pause() {
+        mutex.withLock {
+            getPlayer()?.pause()
+        }
+    }
+
+    suspend fun play() {
+        mutex.withLock {
+            getPlayer()?.play()
+        }
     }
 
     fun isPlaying(): Boolean = getPlayer()?.isPlaying == true
@@ -71,6 +105,9 @@ object AudioPlayer {
     }
 
     private var sound: Noise? = null
+    private var sleepTimeMilli: Long = 0
+    private val timerCoroutine = CoroutineScope(Dispatchers.Default + Job())
+    private var mutex: Mutex = Mutex()
 
     private fun getPlayer(): Player? = AudioService.instance?.getPlayer()
 }

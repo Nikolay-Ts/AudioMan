@@ -32,7 +32,11 @@ import androidx.compose.material.rememberDismissState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -51,6 +55,7 @@ import com.sonnenstahl.audioman.utils.SOUNDS_FILE_PATH
 import com.sonnenstahl.audioman.utils.fallBackSound
 import com.sonnenstahl.audioman.utils.saveSound
 import com.sonnenstahl.audioman.utils.saveSounds
+import kotlinx.coroutines.launch
 import java.io.File
 
 @androidx.annotation.OptIn(UnstableApi::class)
@@ -71,6 +76,15 @@ fun CustomSoundItem(
             true -> Color.LightGray
             false -> Color.Black
         }
+    val isPlaying = remember { mutableStateOf(AudioPlayer.isPlaying()) }
+    val coroutineScope = rememberCoroutineScope()
+
+    LaunchedEffect(isPlaying.value) {
+        when (isPlaying.value) {
+            true -> AudioPlayer.play()
+            false -> AudioPlayer.pause()
+        }
+    }
 
     val dismissState =
         rememberDismissState(
@@ -79,7 +93,7 @@ fun CustomSoundItem(
                     val isCurrentlyPlayingDismissed = sound.id == AudioPlayer.getSound().id
 
                     if (isCurrentlyPlayingDismissed) {
-                        AudioPlayer.pause()
+                        isPlaying.value = false
                         AudioPlayer.clearSound()
                         saveSound(context, fallBackSound, CURRENT_SOUND_PATH)
                     }
@@ -120,7 +134,9 @@ fun CustomSoundItem(
                         ).padding(12.dp)
                         .combinedClickable(
                             onClick = {
-                                AudioPlayer.playAsset(context, sound)
+                                coroutineScope.launch {
+                                    AudioPlayer.playAsset(context, sound)
+                                }
                                 saveSound(context, sound, CURRENT_SOUND_PATH)
                             },
                             onLongClick = {

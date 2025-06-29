@@ -1,6 +1,5 @@
 package com.sonnenstahl.audioman
 
-import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -32,7 +31,6 @@ fun AddNoise(
     currentSound: MutableState<Noise?>,
     onDismiss: () -> Unit,
 ) {
-    Log.d("MEOW MEOW", "In the thingt ${currentSound.value}")
     val context = LocalContext.current
     val keyboard = LocalSoftwareKeyboardController.current
     // Initialize title and description with default values if currentSound is null

@@ -45,6 +45,7 @@ const val PAUSED_IMAGE_SIZE: Int = (PLAYING_IMAGE_SIZE * 0.75).toInt()
 @Composable
 fun HomeScreen(navController: NavController) {
     val context = LocalContext.current
+    val displayTimer = remember { mutableStateOf(false) }
     val darkMode = isSystemInDarkTheme()
     val isPlaying = remember { mutableStateOf(AudioPlayer.isPlaying()) }
     val currentlyPlaying = remember { mutableStateOf(AudioPlayer.getSound()) }
@@ -131,13 +132,23 @@ fun HomeScreen(navController: NavController) {
         currentSound.value = loadSound(context, CURRENT_SOUND_PATH)
     }
 
+    LaunchedEffect(isPlaying.value) {
+        when (isPlaying.value) {
+            true -> AudioPlayer.play()
+            false -> AudioPlayer.pause()
+        }
+    }
+
+    if (displayTimer.value) {
+        SleepTimer(context, { displayTimer.value = false })
+    }
+
     Column(
         modifier =
             Modifier
                 .fillMaxSize()
                 .padding(20.dp),
     ) {
-        // Header at the top
         Text(
             text = "Currently Playing",
             style = MaterialTheme.typography.titleLarge,
@@ -147,7 +158,28 @@ fun HomeScreen(navController: NavController) {
                     .padding(bottom = 16.dp),
         )
 
-        // Main content in center
+        IconButton(
+            onClick = {
+                displayTimer.value = true
+            },
+            modifier =
+                Modifier
+                    .align(Alignment.End)
+                    .padding(end = 8.dp),
+        ) {
+            val imagePath =
+                when (darkMode) {
+                    true -> "file:///android_asset/timer_light.png"
+                    false -> "file:///android_asset/timer.png"
+                }
+
+            Image(
+                painter = rememberAsyncImagePainter(model = imagePath),
+                contentDescription = "Set Sleep Timer",
+                modifier = Modifier.size(32.dp),
+            )
+        }
+
         Box(
             modifier =
                 Modifier
@@ -159,7 +191,7 @@ fun HomeScreen(navController: NavController) {
             val isDefault =
                 when (imagePath) {
                     "android_asset/default_white.png",
-                    "android_asset/default_white.png",
+                    "android_asset/default.png",
                     DEFAULT_LIGHT_IMAGE,
                     DEFAULT_IMAGE_URI,
                     -> true
@@ -283,10 +315,8 @@ fun HomeScreen(navController: NavController) {
                 }
 
                 if (isPlaying.value) {
-                    AudioPlayer.pause()
                     isPlaying.value = false
                 } else {
-                    AudioPlayer.play()
                     isPlaying.value = true
                 }
             }

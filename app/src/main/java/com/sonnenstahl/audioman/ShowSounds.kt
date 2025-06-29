@@ -20,6 +20,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -33,6 +34,7 @@ import com.sonnenstahl.audioman.utils.DEFAULT_IMAGE_URI
 import com.sonnenstahl.audioman.utils.DEFAULT_LIGHT_IMAGE
 import com.sonnenstahl.audioman.utils.Noise
 import com.sonnenstahl.audioman.utils.saveSound
+import kotlinx.coroutines.launch
 import java.io.File
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -44,6 +46,7 @@ fun SoundItem(
     isCustom: Boolean = false,
 ) {
     val darkMode = isSystemInDarkTheme()
+    val coroutineScope = rememberCoroutineScope()
     val borderColor =
         when (darkMode) {
             true -> Color.LightGray
@@ -63,7 +66,9 @@ fun SoundItem(
                     shape = RoundedCornerShape(12.dp),
                 ).padding(12.dp)
                 .combinedClickable {
-                    AudioPlayer.playAsset(context, sound)
+                    coroutineScope.launch {
+                        AudioPlayer.playAsset(context, sound)
+                    }
                     saveSound(context, sound, CURRENT_SOUND_PATH)
                 },
     ) {
