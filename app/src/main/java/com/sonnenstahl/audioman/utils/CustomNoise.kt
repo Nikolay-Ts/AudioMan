@@ -7,5 +7,5 @@ data class CustomNoise(
     val noiseType: String,
     val amplitude: Float,
     val spectrum: Float,
-    val samples: ByteArray
+    val samples: ByteArray,
 )

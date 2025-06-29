@@ -8,7 +8,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -34,7 +33,7 @@ fun Library() {
     AddNoise(
         showDialog = popUpDialog.value,
         soundsList = customSounds,
-        currentSound = currentNoise
+        currentSound = currentNoise,
     ) {
         currentNoise.value = null
         popUpDialog.value = false
@@ -43,17 +42,18 @@ fun Library() {
 
     Box(modifier = Modifier.fillMaxSize()) {
         LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = 16.dp),
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 16.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             item {
                 Text(
                     text = "Sound Library",
                     style = MaterialTheme.typography.titleLarge,
-                    modifier = Modifier.padding(vertical = 8.dp)
+                    modifier = Modifier.padding(vertical = 8.dp),
                 )
             }
 
@@ -63,7 +63,7 @@ fun Library() {
 
             items(
                 items = customSounds,
-                key = { sound -> sound.id }
+                key = { sound -> sound.id },
             ) { sound ->
                 CustomSoundItem(
                     sound = sound,
@@ -71,7 +71,7 @@ fun Library() {
                     currentSound = currentNoise,
                     onSoundRemoved = { recomposeCounter.intValue++ },
                     openDialogTrigger = popUpDialog,
-                    context = context
+                    context = context,
                 )
             }
 
@@ -84,17 +84,19 @@ fun Library() {
             onClick = { popUpDialog.value = true },
             colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
             contentPadding = PaddingValues(0.dp),
-            modifier = Modifier
-                .align(Alignment.BottomEnd)
-                .padding(16.dp)
-                .size(56.dp),
+            modifier =
+                Modifier
+                    .align(Alignment.BottomEnd)
+                    .padding(16.dp)
+                    .size(56.dp),
         ) {
             val filepath = if (isSystemInDarkTheme()) "dark-add.svg" else "add.svg"
             SvgImageFromAssets(
                 filepath = filepath,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(12.dp)
+                modifier =
+                    Modifier
+                        .fillMaxSize()
+                        .padding(12.dp),
             )
         }
     }

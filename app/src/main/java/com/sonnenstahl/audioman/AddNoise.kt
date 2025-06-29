@@ -18,14 +18,12 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.core.net.toUri
 import com.sonnenstahl.audioman.ui.theme.Teal
 import com.sonnenstahl.audioman.utils.*
 import java.io.File
-
 
 @Composable
 fun AddNoise(
@@ -35,38 +33,55 @@ fun AddNoise(
     onDismiss: () -> Unit,
 ) {
     Log.d("MEOW MEOW", "In the thingt ${currentSound.value}")
-    val context         = LocalContext.current
-    val keyboard        = LocalSoftwareKeyboardController.current
+    val context = LocalContext.current
+    val keyboard = LocalSoftwareKeyboardController.current
     // Initialize title and description with default values if currentSound is null
-    val title           = remember { mutableStateOf(currentSound.value?.title ?: "") }
-    val description     = remember { mutableStateOf(currentSound.value?.description ?: "") }
-    val audioUri        = remember { mutableStateOf(currentSound.value?.audioPath?.let { path -> if (path.startsWith("android_asset/")) path.toUri() else File(path).toUri() }) }
-    val imageUri        = remember { mutableStateOf(currentSound.value?.imagePath?.let { path -> if (path.startsWith("android_asset/")) path.toUri() else File(path).toUri() }) }
+    val title = remember { mutableStateOf(currentSound.value?.title ?: "") }
+    val description = remember { mutableStateOf(currentSound.value?.description ?: "") }
+    val audioUri =
+        remember {
+            mutableStateOf(
+                currentSound.value?.audioPath?.let { path ->
+                    if (path.startsWith("android_asset/")) path.toUri() else File(path).toUri()
+                },
+            )
+        }
+    val imageUri =
+        remember {
+            mutableStateOf(
+                currentSound.value?.imagePath?.let { path ->
+                    if (path.startsWith("android_asset/")) path.toUri() else File(path).toUri()
+                },
+            )
+        }
 
-    val darkMode        = isSystemInDarkTheme()
+    val darkMode = isSystemInDarkTheme()
     val supportTitle = remember { mutableStateOf("") }
     val supportAudio = remember { mutableStateOf("") }
-    val notUnique    = remember { mutableStateOf(false) }
-    val validNoise   = remember { mutableStateOf(ValidNoise()) }
+    val notUnique = remember { mutableStateOf(false) }
+    val validNoise = remember { mutableStateOf(ValidNoise()) }
 
-    val audioPickerLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.GetContent()
-    ) { uri -> audioUri.value = uri }
+    val audioPickerLauncher =
+        rememberLauncherForActivityResult(
+            contract = ActivityResultContracts.GetContent(),
+        ) { uri -> audioUri.value = uri }
 
-    val imagePickerLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.GetContent()
-    ) { uri -> imageUri.value = uri }
-
+    val imagePickerLauncher =
+        rememberLauncherForActivityResult(
+            contract = ActivityResultContracts.GetContent(),
+        ) { uri -> imageUri.value = uri }
 
     LaunchedEffect(currentSound.value) {
         title.value = currentSound.value?.title ?: ""
         description.value = currentSound.value?.description ?: ""
-        audioUri.value = currentSound.value?.audioPath?.let { path ->
-            if (path.startsWith("android_asset/")) path.toUri() else File(path).toUri()
-        }
-        imageUri.value = currentSound.value?.imagePath?.let { path ->
-            if (path.startsWith("android_asset/")) path.toUri() else File(path).toUri()
-        }
+        audioUri.value =
+            currentSound.value?.audioPath?.let { path ->
+                if (path.startsWith("android_asset/")) path.toUri() else File(path).toUri()
+            }
+        imageUri.value =
+            currentSound.value?.imagePath?.let { path ->
+                if (path.startsWith("android_asset/")) path.toUri() else File(path).toUri()
+            }
         supportTitle.value = ""
         supportAudio.value = ""
         notUnique.value = false
@@ -76,27 +91,28 @@ fun AddNoise(
     if (showDialog) {
         Dialog(onDismissRequest = onDismiss) {
             Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(600.dp)
-                    .padding(16.dp),
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .height(600.dp)
+                        .padding(16.dp),
                 shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
             ) {
                 Column(
                     modifier = Modifier.fillMaxSize(),
                     verticalArrangement = Arrangement.SpaceAround,
-                    horizontalAlignment = Alignment.CenterHorizontally
+                    horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
                     Text(
                         "Add a new Track!",
                         style = MaterialTheme.typography.headlineSmall,
-                        modifier = Modifier.padding(top = 25.dp)
+                        modifier = Modifier.padding(top = 25.dp),
                     )
 
                     // Title input field
                     Column(
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth(),
                     ) {
                         val focusManager = LocalFocusManager.current
                         TextField(
@@ -113,38 +129,40 @@ fun AddNoise(
                             placeholder = { Text("Enter a title for your Noise") },
                             isError = !validNoise.value.title || notUnique.value,
                             singleLine = true,
-                            colors = TextFieldDefaults.colors(
-                                unfocusedLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                                focusedLabelColor = MaterialTheme.colorScheme.primary,
-                                unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
-                                focusedTextColor = MaterialTheme.colorScheme.onSurface,
-                                errorTextColor = MaterialTheme.colorScheme.error,
-                                cursorColor = MaterialTheme.colorScheme.primary,
-                                focusedIndicatorColor = MaterialTheme.colorScheme.primary,
-                                unfocusedIndicatorColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                                errorIndicatorColor = MaterialTheme.colorScheme.error,
-                                unfocusedContainerColor = Color.Transparent,
-                                focusedContainerColor = Color.Transparent,
-                                errorContainerColor = Color.Transparent,
-                                disabledContainerColor = Color.Transparent,
-                            ),
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 16.dp)
+                            colors =
+                                TextFieldDefaults.colors(
+                                    unfocusedLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    focusedLabelColor = MaterialTheme.colorScheme.primary,
+                                    unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
+                                    focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                                    errorTextColor = MaterialTheme.colorScheme.error,
+                                    cursorColor = MaterialTheme.colorScheme.primary,
+                                    focusedIndicatorColor = MaterialTheme.colorScheme.primary,
+                                    unfocusedIndicatorColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    errorIndicatorColor = MaterialTheme.colorScheme.error,
+                                    unfocusedContainerColor = Color.Transparent,
+                                    focusedContainerColor = Color.Transparent,
+                                    errorContainerColor = Color.Transparent,
+                                    disabledContainerColor = Color.Transparent,
+                                ),
+                            modifier =
+                                Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 16.dp),
                         )
                         if (!validNoise.value.title || notUnique.value) {
                             Text(
                                 text = supportTitle.value.ifEmpty { "Title must be unique and not empty" },
                                 color = MaterialTheme.colorScheme.error,
                                 style = MaterialTheme.typography.bodySmall,
-                                modifier = Modifier.padding(top = 4.dp, start = 16.dp)
+                                modifier = Modifier.padding(top = 4.dp, start = 16.dp),
                             )
                         }
                     }
 
                     // Description input field
                     Column(
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth(),
                     ) {
                         val focusManager = LocalFocusManager.current
                         TextField(
@@ -155,28 +173,30 @@ fun AddNoise(
                             label = { Text("Description") },
                             placeholder = { Text("Describe what makes your Noise special") },
                             singleLine = false,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 16.dp),
-                            colors = TextFieldDefaults.colors(
-                                unfocusedLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                                focusedLabelColor = MaterialTheme.colorScheme.primary,
-                                unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
-                                focusedTextColor = MaterialTheme.colorScheme.onSurface,
-                                cursorColor = MaterialTheme.colorScheme.primary,
-                                focusedIndicatorColor = MaterialTheme.colorScheme.primary,
-                                unfocusedIndicatorColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                                unfocusedContainerColor = Color.Transparent,
-                                focusedContainerColor = Color.Transparent,
-                                errorContainerColor = Color.Transparent,
-                                disabledContainerColor = Color.Transparent,
-                            )
+                            modifier =
+                                Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 16.dp),
+                            colors =
+                                TextFieldDefaults.colors(
+                                    unfocusedLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    focusedLabelColor = MaterialTheme.colorScheme.primary,
+                                    unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
+                                    focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                                    cursorColor = MaterialTheme.colorScheme.primary,
+                                    focusedIndicatorColor = MaterialTheme.colorScheme.primary,
+                                    unfocusedIndicatorColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    unfocusedContainerColor = Color.Transparent,
+                                    focusedContainerColor = Color.Transparent,
+                                    errorContainerColor = Color.Transparent,
+                                    disabledContainerColor = Color.Transparent,
+                                ),
                         )
                     }
 
                     // Audio Picker
                     Column(
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth(),
                     ) {
                         OutlinedButton(
                             onClick = {
@@ -185,20 +205,26 @@ fun AddNoise(
                                 supportAudio.value = ""
                                 validNoise.value = validNoise.value.copy(audioPath = true)
                             },
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 16.dp)
+                            modifier =
+                                Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 16.dp),
                         ) {
                             Text(
                                 if (audioUri.value != null) {
                                     "Selected Track: ${audioUri.value?.lastPathSegment ?: "..."}"
-                                } else if (currentSound.value?.audioPath != null && !currentSound.value!!.audioPath.startsWith("android_asset/")) {
+                                } else if (currentSound.value?.audioPath != null &&
+                                    !currentSound.value!!.audioPath.startsWith("android_asset/")
+                                ) {
                                     "Selected Track: ${File(currentSound.value!!.audioPath).name}"
-                                } else if (currentSound.value?.audioPath != null && currentSound.value!!.audioPath.startsWith("android_asset/")) {
+                                } else if (currentSound.value?.audioPath != null &&
+                                    currentSound.value!!.audioPath.startsWith("android_asset/")
+                                ) {
                                     "Selected Track: Default Asset"
-                                }
-                                else "Select Track",
-                                color = MaterialTheme.colorScheme.onSurface
+                                } else {
+                                    "Select Track"
+                                },
+                                color = MaterialTheme.colorScheme.onSurface,
                             )
                         }
                         if (!validNoise.value.audioPath && supportAudio.value.isNotEmpty()) {
@@ -206,7 +232,7 @@ fun AddNoise(
                                 text = supportAudio.value,
                                 color = MaterialTheme.colorScheme.error,
                                 style = MaterialTheme.typography.bodySmall,
-                                modifier = Modifier.padding(top = 4.dp, start = 16.dp)
+                                modifier = Modifier.padding(top = 4.dp, start = 16.dp),
                             )
                         }
                     }
@@ -217,32 +243,40 @@ fun AddNoise(
                             keyboard?.hide()
                             imagePickerLauncher.launch("image/*")
                         },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 16.dp)
+                        modifier =
+                            Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp),
                     ) {
                         Text(
                             if (imageUri.value != null) {
                                 "Selected Image: ${imageUri.value?.lastPathSegment ?: "..."}"
-                            } else if (currentSound.value?.imagePath != null && !currentSound.value!!.imagePath.startsWith("android_asset/")) {
+                            } else if (currentSound.value?.imagePath != null &&
+                                !currentSound.value!!.imagePath.startsWith("android_asset/")
+                            ) {
                                 "Selected Image: ${File(currentSound.value!!.imagePath).name}"
-                            } else if (currentSound.value?.imagePath != null && currentSound.value!!.imagePath.startsWith("android_asset/")) {
+                            } else if (currentSound.value?.imagePath != null &&
+                                currentSound.value!!.imagePath.startsWith("android_asset/")
+                            ) {
                                 "Selected Image: Default Asset"
-                            }
-                            else "Select Cover",
-                            color = MaterialTheme.colorScheme.onSurface
+                            } else {
+                                "Select Cover"
+                            },
+                            color = MaterialTheme.colorScheme.onSurface,
                         )
                     }
 
                     Button(
                         onClick = {
-                            val storedAudioPath = audioUri.value?.let {
-                                saveUri(context, it, "audio_${System.currentTimeMillis()}")
-                            }
+                            val storedAudioPath =
+                                audioUri.value?.let {
+                                    saveUri(context, it, "audio_${System.currentTimeMillis()}")
+                                }
 
-                            val storedImagePath = imageUri.value?.let {
-                                saveUri(context, it, "image_${System.currentTimeMillis()}")
-                            }
+                            val storedImagePath =
+                                imageUri.value?.let {
+                                    saveUri(context, it, "image_${System.currentTimeMillis()}")
+                                }
 
                             val finalImagePath: String
                             if (storedImagePath != null) {
@@ -268,20 +302,24 @@ fun AddNoise(
                                 finalAudioPath = "android_asset/$defaultAssetAudioFilename"
                             }
 
-
-                            val newNoise = Noise(
-                                id = currentSound.value?.id ?: java.util.UUID.randomUUID().toString(),
-                                title = title.value,
-                                description = description.value,
-                                audioPath = finalAudioPath,
-                                imagePath = finalImagePath
-                            )
+                            val newNoise =
+                                Noise(
+                                    id =
+                                        currentSound.value?.id ?: java.util.UUID
+                                            .randomUUID()
+                                            .toString(),
+                                    title = title.value,
+                                    description = description.value,
+                                    audioPath = finalAudioPath,
+                                    imagePath = finalImagePath,
+                                )
 
                             validNoise.value = validateNoise(newNoise)
 
-                            notUnique.value = soundsList.any {
-                                it.title == newNoise.title && it.id != newNoise.id
-                            }
+                            notUnique.value =
+                                soundsList.any {
+                                    it.title == newNoise.title && it.id != newNoise.id
+                                }
 
                             if (title.value.isBlank()) {
                                 validNoise.value = validNoise.value.copy(title = false)
@@ -293,7 +331,6 @@ fun AddNoise(
                                 supportTitle.value = ""
                             }
 
-
                             if (newNoise.audioPath.startsWith("android_asset/") && audioUri.value == null && currentSound.value == null) {
                                 validNoise.value = validNoise.value.copy(audioPath = false)
                                 supportAudio.value = "Choose your Track"
@@ -304,11 +341,9 @@ fun AddNoise(
                                 supportAudio.value = ""
                             }
 
-
                             if (!validNoise.value.title || !validNoise.value.audioPath || notUnique.value) {
                                 return@Button
                             }
-
 
                             val index = soundsList.indexOfFirst { it.id == newNoise.id }
 
@@ -326,11 +361,12 @@ fun AddNoise(
                             imageUri.value = null
                             onDismiss()
                         },
-                        modifier = Modifier
-                            .padding(10.dp)
-                            .fillMaxWidth()
-                            .padding(horizontal = 16.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = Teal)
+                        modifier =
+                            Modifier
+                                .padding(10.dp)
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = Teal),
                     ) {
                         val text = if (currentSound.value == null) "Add Noise" else "Modify"
                         Text(text, color = Color.White)

@@ -28,7 +28,7 @@ class MainActivity : ComponentActivity() {
                 // A surface container using the 'background' color from the theme
                 Surface(
                     modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
+                    color = MaterialTheme.colorScheme.background,
                 ) {
                     AppNavigation()
                 }
@@ -44,26 +44,27 @@ fun AppNavigation() {
     val currentBackStack = navController.currentBackStackEntryAsState()
     val currentRoute = currentBackStack.value?.destination?.route
 
-    val bottomNavRoutes = listOf(
-        Router.Sounds,
-        Router.Home,
-        Router.CustomNoise
-    )
+    val bottomNavRoutes =
+        listOf(
+            Router.Sounds,
+            Router.Home,
+            Router.CustomNoise,
+        )
 
     Scaffold(
         bottomBar = {
             if (bottomNavRoutes.any { it.route == currentRoute }) {
                 NavBar(navController, bottomNavRoutes)
             }
-        }
+        },
     ) { innerPadding ->
         NavHost(
             navController = navController,
             startDestination = Router.Home.route,
-            modifier = Modifier.padding(innerPadding)
+            modifier = Modifier.padding(innerPadding),
         ) {
-            composable(Router.Home.route)        { HomeScreen(navController) }
-            composable(Router.Sounds.route)      { Library() }
+            composable(Router.Home.route) { HomeScreen(navController) }
+            composable(Router.Sounds.route) { Library() }
             composable(Router.CustomNoise.route) { CustomNoise() }
         }
     }

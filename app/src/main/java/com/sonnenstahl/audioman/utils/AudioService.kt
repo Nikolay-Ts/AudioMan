@@ -7,22 +7,20 @@ import android.os.Build
 import android.support.v4.media.session.MediaSessionCompat
 import android.util.Log
 import androidx.core.app.NotificationCompat
+import androidx.media.app.NotificationCompat.MediaStyle
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.session.MediaSession
 import androidx.media3.session.MediaSessionService
-import androidx.media.app.NotificationCompat.MediaStyle
 
 class AudioService : MediaSessionService() {
-
     private lateinit var player: ExoPlayer
     private var session: MediaSession? = null
-    private lateinit var mediaSessionCompat:  MediaSessionCompat
+    private lateinit var mediaSessionCompat: MediaSessionCompat
 
     override fun onCreate() {
         super.onCreate()
 
         player = ExoPlayer.Builder(this).build()
-
 
         player = ExoPlayer.Builder(this).build()
         session = MediaSession.Builder(this, player).setId("AudioManSession").build()
@@ -54,24 +52,23 @@ class AudioService : MediaSessionService() {
     private fun buildPlaceholderNotification(): Notification {
         val channelId = "audioman_playback_channel"
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val channel = NotificationChannel(
-                channelId,
-                "Audio Playback",
-                NotificationManager.IMPORTANCE_LOW
-            )
+            val channel =
+                NotificationChannel(
+                    channelId,
+                    "Audio Playback",
+                    NotificationManager.IMPORTANCE_LOW,
+                )
             getSystemService(NotificationManager::class.java).createNotificationChannel(channel)
         }
 
-        return NotificationCompat.Builder(this, channelId)
+        return NotificationCompat
+            .Builder(this, channelId)
             .setContentTitle("AudioMan Ready")
             .setContentText("Waiting for playback...")
             .setStyle(
                 MediaStyle()
-                    .setMediaSession(mediaSessionCompat.sessionToken)
-            )
-            .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+                    .setMediaSession(mediaSessionCompat.sessionToken),
+            ).setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
             .build()
     }
-
-
 }

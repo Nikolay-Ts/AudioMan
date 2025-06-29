@@ -5,33 +5,34 @@ import android.net.Uri
 import android.util.Log
 import android.webkit.MimeTypeMap
 import androidx.compose.runtime.mutableStateListOf
+import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import java.io.File
-import java.io.FileOutputStream
-import kotlinx.serialization.encodeToString
 import java.io.FileNotFoundException
+import java.io.FileOutputStream
 
-
-const val SOUNDS_FILE_PATH: String   = "sounds.json"
+const val SOUNDS_FILE_PATH: String = "sounds.json"
 const val CURRENT_SOUND_PATH: String = "current.json"
-const val CUSTOM_SOUND_PATH: String  = "custom.json"
-
+const val CUSTOM_SOUND_PATH: String = "custom.json"
 
 // TODO: add all of the serialisation of the data class Sounds
+
 /**
  * because it is URI based, this works for both sound and images
  */
 fun saveUri(
     context: Context,
     uri: Uri,
-    prefix: String
-): String? {
-    return try {
+    prefix: String,
+): String? =
+    try {
         val mimeType = context.contentResolver.getType(uri)
-        val extension = MimeTypeMap.getSingleton()
-            .getExtensionFromMimeType(mimeType) ?: "bin"
+        val extension =
+            MimeTypeMap
+                .getSingleton()
+                .getExtensionFromMimeType(mimeType) ?: "bin"
 
-        val fileName = "$prefix.${extension}"
+        val fileName = "$prefix.$extension"
         val inputStream = context.contentResolver.openInputStream(uri)
         val file = File(context.filesDir, fileName)
         val outputStream = FileOutputStream(file)
@@ -45,12 +46,11 @@ fun saveUri(
         e.printStackTrace()
         null
     }
-}
 
 fun saveSounds(
     context: Context,
     sounds: List<Noise>,
-    filepath: String
+    filepath: String,
 ) {
     try {
         val json = Json.encodeToString(sounds)
@@ -60,12 +60,14 @@ fun saveSounds(
     }
 }
 
-fun loadSounds(context: Context, filepath: String): MutableList<Noise> {
+fun loadSounds(
+    context: Context,
+    filepath: String,
+): MutableList<Noise> {
     val file = File(context.filesDir, filepath)
     return try {
         val jsonString = file.readText()
         Json.decodeFromString<List<Noise>>(jsonString).toMutableList()
-
     } catch (e: FileNotFoundException) {
         mutableStateListOf<Noise>()
     }
@@ -74,7 +76,7 @@ fun loadSounds(context: Context, filepath: String): MutableList<Noise> {
 fun saveSound(
     context: Context,
     sounds: Noise,
-    filepath: String
+    filepath: String,
 ) {
     try {
         val json = Json.encodeToString(sounds)
@@ -84,21 +86,23 @@ fun saveSound(
     }
 }
 
-fun loadSound(context: Context, filepath: String): Noise? {
+fun loadSound(
+    context: Context,
+    filepath: String,
+): Noise? {
     val file = File(context.filesDir, filepath)
     return try {
         val jsonString = file.readText()
         Json.decodeFromString<Noise>(jsonString)
-
     } catch (e: FileNotFoundException) {
-       null
+        null
     }
 }
 
 fun saveCustomSound(
     context: Context,
     sounds: CustomNoise,
-    filepath: String
+    filepath: String,
 ) {
     try {
         val json = Json.encodeToString(sounds)
@@ -108,15 +112,19 @@ fun saveCustomSound(
     }
 }
 
-fun loadCustomSound(context: Context, filepath: String): CustomNoise? {
+fun loadCustomSound(
+    context: Context,
+    filepath: String,
+): CustomNoise? {
     val file = File(context.filesDir, filepath)
     if (!file.exists()) return null
 
     return try {
-        val json = Json {
-            ignoreUnknownKeys = true
-            isLenient = true
-        }
+        val json =
+            Json {
+                ignoreUnknownKeys = true
+                isLenient = true
+            }
         val content = file.readText()
         json.decodeFromString<CustomNoise>(content)
     } catch (e: Exception) {
@@ -128,7 +136,10 @@ fun loadCustomSound(context: Context, filepath: String): CustomNoise? {
 /**
  * for debugging purposes
  */
-fun deleteSoundsFile(context: Context, filepath: String = SOUNDS_FILE_PATH): Boolean {
+fun deleteSoundsFile(
+    context: Context,
+    filepath: String = SOUNDS_FILE_PATH,
+): Boolean {
     val file = File(context.filesDir, filepath)
     return if (file.exists()) {
         file.delete().also {

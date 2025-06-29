@@ -3,11 +3,11 @@ package com.sonnenstahl.audioman
 import android.content.Context
 import android.os.Build
 import androidx.annotation.RequiresApi
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.combinedClickable
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -38,62 +38,69 @@ import java.io.File
 @RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun SoundItem(sound: Noise, context: Context, isCustom: Boolean = false) {
+fun SoundItem(
+    sound: Noise,
+    context: Context,
+    isCustom: Boolean = false,
+) {
     val darkMode = isSystemInDarkTheme()
-    val borderColor = when (darkMode) {
-        true -> Color.LightGray
-        false -> Color.Black
-    }
+    val borderColor =
+        when (darkMode) {
+            true -> Color.LightGray
+            false -> Color.Black
+        }
 
     Box(
-        modifier = Modifier
-            .fillMaxWidth(0.95f)
-            .background(Teal, shape = RoundedCornerShape(12.dp))
-            .border(
-                width = 1.dp,
-                color = borderColor,
-                shape = RoundedCornerShape(12.dp)
-            )
-            .padding(12.dp)
-            .combinedClickable {
-                AudioPlayer.playAsset(context, sound)
-                saveSound(context, sound, CURRENT_SOUND_PATH)
-            }
+        modifier =
+            Modifier
+                .fillMaxWidth(0.95f)
+                .background(
+                    if (darkMode) Teal else LightTeal,
+                    shape = RoundedCornerShape(12.dp),
+                ).border(
+                    width = 1.dp,
+                    color = borderColor,
+                    shape = RoundedCornerShape(12.dp),
+                ).padding(12.dp)
+                .combinedClickable {
+                    AudioPlayer.playAsset(context, sound)
+                    saveSound(context, sound, CURRENT_SOUND_PATH)
+                },
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             if (isCustom) {
-
-                val imageModel = if (DEFAULT_LIGHT_IMAGE in sound.imagePath || DEFAULT_IMAGE_URI in sound.imagePath ) {
-                    "file:///android_asset/$DEFAULT_LIGHT_IMAGE}"
-                } else {
-                    File(sound.imagePath).absolutePath
-                }
+                val imageModel =
+                    if (DEFAULT_LIGHT_IMAGE in sound.imagePath || DEFAULT_IMAGE_URI in sound.imagePath) {
+                        "file:///android_asset/$DEFAULT_LIGHT_IMAGE}"
+                    } else {
+                        File(sound.imagePath).absolutePath
+                    }
                 Image(
                     painter = rememberAsyncImagePainter(imageModel),
                     contentDescription = null,
-                    modifier = Modifier.size(40.dp)
+                    modifier = Modifier.size(40.dp),
                 )
             } else {
-                val path = when (darkMode) {
-                    true  -> DEFAULT_LIGHT_IMAGE
-                    false -> DEFAULT_IMAGE_URI
-                }
+                val path =
+                    when (darkMode) {
+                        true -> DEFAULT_LIGHT_IMAGE
+                        false -> DEFAULT_IMAGE_URI
+                    }
                 Image(
                     rememberAsyncImagePainter(model = "file:///android_asset/$path"),
                     contentDescription = null,
-                    modifier = Modifier.size(40.dp)
+                    modifier = Modifier.size(40.dp),
                 )
             }
-
 
             Column {
                 Text(text = sound.title, style = MaterialTheme.typography.titleMedium)
                 Text(
                     text = sound.description,
-                    style = MaterialTheme.typography.bodySmall
+                    style = MaterialTheme.typography.bodySmall,
                 )
             }
         }

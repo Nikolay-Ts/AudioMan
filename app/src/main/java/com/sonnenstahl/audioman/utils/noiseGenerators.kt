@@ -1,6 +1,5 @@
 package com.sonnenstahl.audioman.utils
 
-import android.R
 import android.content.Context
 import android.os.Build
 import androidx.annotation.RequiresApi
@@ -12,7 +11,6 @@ import java.io.File
 import java.io.FileOutputStream
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
-import java.util.UUID
 import kotlin.random.Random
 
 fun generateNoiseSamples(
@@ -20,7 +18,7 @@ fun generateNoiseSamples(
     amplitude: Float,
     spectrum: Float,
     sampleRate: Int,
-    durationSec: Int
+    durationSec: Int,
 ): ByteArray {
     val numSamples = sampleRate * durationSec
     val output = ByteArray(numSamples * 2)
@@ -34,12 +32,13 @@ fun generateNoiseSamples(
         brown += white * 0.02
         brown = brown.coerceIn(-1.0, 1.0)
 
-        val sample = when (type.lowercase()) {
-            "white" -> white
-            "pink" -> lerp(white, pink, spectrum)
-            "brown" -> lerp(pink, brown, spectrum)
-            else -> white
-        }
+        val sample =
+            when (type.lowercase()) {
+                "white" -> white
+                "pink" -> lerp(white, pink, spectrum)
+                "brown" -> lerp(pink, brown, spectrum)
+                else -> white
+            }
 
         val scaled = (sample * amplitude * Short.MAX_VALUE).toInt().coerceIn(Short.MIN_VALUE.toInt(), Short.MAX_VALUE.toInt())
         output[i * 2] = (scaled and 0xFF).toByte()
@@ -49,9 +48,17 @@ fun generateNoiseSamples(
     return output
 }
 
-fun lerp(a: Double, b: Double, alpha: Float): Double = (1 - alpha) * a + alpha * b
+fun lerp(
+    a: Double,
+    b: Double,
+    alpha: Float,
+): Double = (1 - alpha) * a + alpha * b
 
-fun writeWav(audioData: ByteArray, sampleRate: Int, outputFile: File): String {
+fun writeWav(
+    audioData: ByteArray,
+    sampleRate: Int,
+    outputFile: File,
+): String {
     val header = createWavHeader(audioData.size, sampleRate)
     FileOutputStream(outputFile).use { fos ->
         fos.write(header)
@@ -60,28 +67,32 @@ fun writeWav(audioData: ByteArray, sampleRate: Int, outputFile: File): String {
     return outputFile.absolutePath
 }
 
-fun createWavHeader(dataLength: Int, sampleRate: Int): ByteArray {
+fun createWavHeader(
+    dataLength: Int,
+    sampleRate: Int,
+): ByteArray {
     val totalDataLen = 36 + dataLength
     val byteRate = sampleRate * 2
 
-    return ByteBuffer.allocate(44).apply {
-        order(ByteOrder.LITTLE_ENDIAN)
-        put("RIFF".toByteArray())
-        putInt(totalDataLen)
-        put("WAVE".toByteArray())
-        put("fmt ".toByteArray())
-        putInt(16)
-        putShort(1)
-        putShort(1)
-        putInt(sampleRate)
-        putInt(byteRate)
-        putShort(2)
-        putShort(16)
-        put("data".toByteArray())
-        putInt(dataLength)
-    }.array()
+    return ByteBuffer
+        .allocate(44)
+        .apply {
+            order(ByteOrder.LITTLE_ENDIAN)
+            put("RIFF".toByteArray())
+            putInt(totalDataLen)
+            put("WAVE".toByteArray())
+            put("fmt ".toByteArray())
+            putInt(16)
+            putShort(1)
+            putShort(1)
+            putInt(sampleRate)
+            putInt(byteRate)
+            putShort(2)
+            putShort(16)
+            put("data".toByteArray())
+            putInt(dataLength)
+        }.array()
 }
-
 
 @RequiresApi(Build.VERSION_CODES.O)
 fun updateGraphData(
@@ -90,7 +101,7 @@ fun updateGraphData(
     amplitude: Float,
     spectrum: Float,
     samplesState: MutableState<ByteArray>,
-    lineColor: MutableState<Color>
+    lineColor: MutableState<Color>,
 ) {
     if (!AudioPlayer.isPlaying()) return
     val file = File(context.cacheDir, "generated_noise.wav")
@@ -99,29 +110,31 @@ fun updateGraphData(
 
     samplesState.value = generateNoiseSamples(noiseType, amplitude, spectrum, sampleRate, durationSec)
 
-    lineColor.value = when (noiseType) {
-        "White" -> Color.Gray
-        "Pink"  -> Pink40
-        "Brown" -> Brown
-        else -> Color.White
-    }
-
+    lineColor.value =
+        when (noiseType) {
+            "White" -> Color.Gray
+            "Pink" -> Pink40
+            "Brown" -> Brown
+            else -> Color.White
+        }
 
     val audioPath = writeWav(samplesState.value, sampleRate, file)
 
-    val sound = Noise(
-        id = "-2",
-        title =  "Generated Noise",
-        description =  "Noise generated via sliders",
-        audioPath = audioPath,
-    )
+    val sound =
+        Noise(
+            id = "-2",
+            title = "Generated Noise",
+            description = "Noise generated via sliders",
+            audioPath = audioPath,
+        )
 
-    val customNoise = CustomNoise(
-        noiseType,
-        amplitude,
-        spectrum,
-        samplesState.value
-    )
+    val customNoise =
+        CustomNoise(
+            noiseType,
+            amplitude,
+            spectrum,
+            samplesState.value,
+        )
 
     saveCustomSound(context, customNoise, CUSTOM_SOUND_PATH)
 }
