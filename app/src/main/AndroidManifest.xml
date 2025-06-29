@@ -3,9 +3,15 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <!-- Permissions -->
+    <!-- REQUIRED for displaying foreground service notifications on Android 13 (API 33) and above -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
+
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.VIBRATE" />
+    <!-- Add INTERNET permission if your player streams from the network -->
+    <uses-permission android:name="android.permission.INTERNET" />
+
 
     <application
         android:allowBackup="true"
@@ -47,19 +53,19 @@
             android:name=".utils.AudioService"
             android:exported="true"
             android:foregroundServiceType="mediaPlayback">
-            <intent-filter>
-                <action android:name="androidx.media3.session.MediaSessionService" />
-            </intent-filter>
-        </service>
+        <intent-filter>
+            <action android:name="androidx.media3.session.MediaSessionService" />
+        </intent-filter>
+    </service>
 
-        <receiver android:name=".MediaWidgetReceiver"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.appwidget.action.APPWIDGET_UPDATE"/>
-            </intent-filter>
-            <meta-data
-                android:name="android.appwidget.provider"
-                android:resource="@xml/audio_man_widget_info"/>
-        </receiver>
-    </application>
-</manifest>
+    <receiver android:name=".MediaWidgetReceiver"
+        android:exported="true">
+        <intent-filter>
+            <action android:name="android.appwidget.action.APPWIDGET_UPDATE"/>
+        </intent-filter>
+        <meta-data
+            android:name="android.appwidget.provider"
+            android:resource="@xml/audio_man_widget_info"/>
+    </receiver>
+</application>
+    </manifest>

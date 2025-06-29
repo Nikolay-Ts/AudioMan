@@ -53,6 +53,7 @@ android {
 
 dependencies {
     implementation("androidx.core:core-ktx:1.13.1")
+    implementation("androidx.compose.runtime:runtime:1.8.3")
     implementation("androidx.glance:glance-appwidget:1.1.1")
     implementation("androidx.glance:glance:1.0.0")
     implementation("androidx.datastore:datastore-preferences:1.0.0")

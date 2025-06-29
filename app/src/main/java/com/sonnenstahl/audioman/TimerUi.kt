@@ -81,7 +81,6 @@ fun TimerUi(
 
     LaunchedEffect(key1 = currentRemainingMillis, key2 = isTimerRunning) {
         if (currentRemainingMillis > 0 && isTimerRunning) {
-            AudioPlayer.play()
             val decrementAmount = 100L
             delay(decrementAmount)
             currentRemainingMillis -= decrementAmount
@@ -89,13 +88,11 @@ fun TimerUi(
                 currentRemainingMillis = 0L
             }
             if (!hasTimerStarted && AudioPlayer.getSound().id != "-1") {
-                AudioPlayer.countDown(context, currentRemainingMillis)
-                hasTimerStarted = false
+                AudioPlayer.turnOnTimer(currentRemainingMillis)
+                hasTimerStarted = true
             }
         } else if (currentRemainingMillis <= 0 && isTimerRunning) {
             isTimerRunning = false
-            AudioPlayer.pause()
-            println("Timer: Countdown finished.")
         }
     }
 

@@ -42,7 +42,7 @@ import java.io.File
 fun CustomNoise() {
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
-    val isDarkTheme = isSystemInDarkTheme()
+    val isDarkTheme    = isSystemInDarkTheme()
 
     var customNoiseData by remember {
         mutableStateOf(loadCustomSound(context, CUSTOM_SOUND_PATH) ?: CustomNoise("White", 0.5f, 0.5f, ByteArray(size = 44100 * 2)))
@@ -66,30 +66,32 @@ fun CustomNoise() {
         }
 
     LaunchedEffect(noiseType, amplitude, spectrum) {
-        val newSamples =
-            generateNoiseSamples(
+        coroutineScope.launch {
+            val newSamples =
+                generateNoiseSamples(
+                    noiseType,
+                    amplitude,
+                    spectrum,
+                    44100,
+                    1,
+                )
+            previewSamples.value = newSamples
+            customNoiseData =
+                customNoiseData.copy(
+                    noiseType = noiseType,
+                    amplitude = amplitude,
+                    spectrum = spectrum,
+                    samples = newSamples,
+                )
+            updateGraphData(
+                context,
                 noiseType,
                 amplitude,
                 spectrum,
-                44100,
-                1,
+                previewSamples,
+                targetLineColor,
             )
-        previewSamples.value = newSamples
-        customNoiseData =
-            customNoiseData.copy(
-                noiseType = noiseType,
-                amplitude = amplitude,
-                spectrum = spectrum,
-                samples = newSamples,
-            )
-        updateGraphData(
-            context,
-            noiseType,
-            amplitude,
-            spectrum,
-            previewSamples,
-            targetLineColor,
-        )
+        }
     }
 
     Column(

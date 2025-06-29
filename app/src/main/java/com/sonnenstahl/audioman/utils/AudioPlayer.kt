@@ -5,6 +5,9 @@ import android.content.Intent
 import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresApi
+import androidx.compose.runtime.State
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.core.net.toUri
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
@@ -13,9 +16,13 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.withContext
 
 object AudioPlayer {
     @RequiresApi(Build.VERSION_CODES.O)
@@ -57,21 +64,31 @@ object AudioPlayer {
 
     @RequiresApi(Build.VERSION_CODES.O)
     fun countDown(
-        context: Context,
-        timeMilli: Long,
     ) {
-        sleepTimeMilli = timeMilli
-        timerCoroutine.launch {
-            while (sleepTimeMilli != 0L) {
+        sleepTimerJob?.cancel()
+
+        Log.d("TIME-LEFT", "$sleepTimeMilli before loop")
+
+        sleepTimerJob =  timerCoroutine.launch {
+            Log.d("TIME-LEFT", "$sleepTimeMilli before loop")
+            while (sleepTimeMilli.value != 0L && isActive.value) {
                 delay(1000)
-                sleepTimeMilli -= 1000L
-                Log.d("TIME-LEFT", "$sleepTimeMilli")
+                sleepTimeMilli.value -= 1000L
+
+                if (sleepTimeMilli.value < 0) {
+                    sleepTimeMilli.value = 0L
+                }
+
+                Log.d("TIME-LEFT", "${sleepTimeMilli.value / 1000L}")
             }
+            Log.d("TIME-LEFT", "jobs done")
             mutex.withLock {
-                getPlayer()?.pause()
+                withContext(Dispatchers.Main) {
+                    getPlayer()?.pause()
+                }
+                isActive.value = false
             }
         }
-        timerCoroutine.cancel()
     }
 
     suspend fun pause() {
@@ -104,8 +121,22 @@ object AudioPlayer {
         sound = null
     }
 
+    suspend fun turnOnTimer(timeMilli: Long) {
+        mutex.withLock {
+            sleepTimeMilli.value = timeMilli
+            isActive.value = true
+        }
+    }
+
+    fun pauseTimer() {
+        isActive.value = false
+    }
+
+
     private var sound: Noise? = null
-    private var sleepTimeMilli: Long = 0
+    private var sleepTimeMilli = MutableStateFlow(0L)
+    var isActive = MutableStateFlow(false)
+    private var sleepTimerJob: Job? = null
     private val timerCoroutine = CoroutineScope(Dispatchers.Default + Job())
     private var mutex: Mutex = Mutex()
 
