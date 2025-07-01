@@ -66,7 +66,7 @@ fun TimerUi(
     val totalTimeMillisFromSetMinutes = rememberSaveable(setMinutes) { setMinutes * 60 * 1000L }
 
     var size by remember { mutableStateOf(IntSize.Zero) }
-    var currentRemainingMillis by remember { mutableStateOf(totalTimeMillisFromSetMinutes) }
+    var currentRemainingMillis by rememberSaveable { mutableStateOf(totalTimeMillisFromSetMinutes) }
     var isTimerRunning by rememberSaveable { mutableStateOf(false) }
     var hasTimerStarted by rememberSaveable { mutableStateOf(false) }
 

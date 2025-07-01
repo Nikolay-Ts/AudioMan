@@ -36,6 +36,8 @@ import com.sonnenstahl.audioman.utils.CURRENT_SOUND_PATH
 import com.sonnenstahl.audioman.utils.DEFAULT_IMAGE_URI
 import com.sonnenstahl.audioman.utils.DEFAULT_LIGHT_IMAGE
 import com.sonnenstahl.audioman.utils.loadSound
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.launch
 import java.io.File
 
 const val PLAYING_IMAGE_SIZE: Int = 250
@@ -46,8 +48,10 @@ const val PAUSED_IMAGE_SIZE: Int = (PLAYING_IMAGE_SIZE * 0.75).toInt()
 fun HomeScreen(navController: NavController) {
     val context = LocalContext.current
     val displayTimer = remember { mutableStateOf(false) }
+    val coroutinScope = rememberCoroutineScope()
     val darkMode = isSystemInDarkTheme()
-    val isPlaying = remember { mutableStateOf(AudioPlayer.isPlaying()) }
+
+    var isPlaying = remember { mutableStateOf(AudioPlayer.isPlaying()) }
     val currentlyPlaying = remember { mutableStateOf(AudioPlayer.getSound()) }
     val volume = rememberSaveable { mutableStateOf(AudioPlayer.getVolume()) }
     var imagePath by remember { mutableStateOf(DEFAULT_IMAGE_URI) }
@@ -314,11 +318,7 @@ fun HomeScreen(navController: NavController) {
                     return@AnimatedPause
                 }
 
-                if (isPlaying.value) {
-                    isPlaying.value = false
-                } else {
-                    isPlaying.value = true
-                }
+                isPlaying.value = !isPlaying.value
             }
         }
     }

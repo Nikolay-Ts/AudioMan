@@ -25,6 +25,7 @@ import androidx.glance.layout.padding
 import androidx.glance.layout.size
 import androidx.glance.text.Text
 import com.sonnenstahl.audioman.utils.UpdateAudioPlayer
+import java.io.File // Required for loading images from file paths
 
 val TITLE_KEY = stringPreferencesKey("title")
 val DESCRIPTION_KEY = stringPreferencesKey("description")
@@ -38,25 +39,30 @@ class HomeWidget : GlanceAppWidget() {
     ) {
         provideContent {
             val preferences = currentState<Preferences>()
-            val title = preferences[TITLE_KEY] ?: "title"
-            val isPlaying = preferences[IS_PLAYING_KEY]
+            val title = preferences[TITLE_KEY] ?: "No Sound Selected" // Default title
+            val description = preferences[DESCRIPTION_KEY] ?: "Tap to open app" // Default description
+            val isPlaying = preferences[IS_PLAYING_KEY] ?: false // Default to not playing
+            val coverUriString = preferences[COVER_URI_KEY] // Get the cover URI string
+
+            val playPauseIcon = if (isPlaying) R.drawable.pause else R.drawable.play
+
             Box(
                 modifier =
                     GlanceModifier
                         .fillMaxWidth()
-                        .clickable(actionStartActivity<MainActivity>()),
+                        .clickable(actionStartActivity<MainActivity>()), // Click widget to open app
             ) {
                 Row(
                     modifier =
                         GlanceModifier
                             .fillMaxSize()
-                            .background(Color.White)
+                            .background(Color.White) // Adjust widget background color as needed
                             .padding(16.dp),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalAlignment = Alignment.Start,
                 ) {
                     Image(
-                        provider = ImageProvider(R.drawable.default_black),
+                        provider = ImageProvider(playPauseIcon), // Use the determined image provider
                         contentDescription = "Cover Image",
                         modifier =
                             GlanceModifier
@@ -65,15 +71,14 @@ class HomeWidget : GlanceAppWidget() {
                     )
 
                     Column(
-                        modifier = GlanceModifier.defaultWeight(),
+                        modifier = GlanceModifier.defaultWeight(), // Makes this column take available space
                         horizontalAlignment = Alignment.Start,
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                         Text(title)
-                        Text("Description")
+                        Text(description) // Display the description
                     }
 
-                    val playPauseIcon = if (isPlaying == true) R.drawable.pause else R.drawable.play
                     Image(
                         provider = ImageProvider(playPauseIcon),
                         contentDescription = "Play/Pause",
@@ -81,7 +86,7 @@ class HomeWidget : GlanceAppWidget() {
                             GlanceModifier
                                 .padding(start = 8.dp)
                                 .size(50.dp)
-                                .clickable(actionRunCallback<UpdateAudioPlayer>()),
+                                .clickable(actionRunCallback<UpdateAudioPlayer>()), // Play/Pause button
                     )
                 }
             }

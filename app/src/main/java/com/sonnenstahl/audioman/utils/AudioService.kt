@@ -8,9 +8,14 @@ import android.support.v4.media.session.MediaSessionCompat
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.media.app.NotificationCompat.MediaStyle
+import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.session.MediaSession
 import androidx.media3.session.MediaSessionService
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.MutableStateFlow
 
 class AudioService : MediaSessionService() {
     private lateinit var player: ExoPlayer
@@ -48,6 +53,7 @@ class AudioService : MediaSessionService() {
         var instance: AudioService? = null
             private set
     }
+
 
     private fun buildPlaceholderNotification(): Notification {
         val channelId = "audioman_playback_channel"

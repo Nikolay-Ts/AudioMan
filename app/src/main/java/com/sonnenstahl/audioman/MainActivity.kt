@@ -59,9 +59,10 @@ fun AppNavigation() {
     val context = LocalContext.current
     val currentBackStack = navController.currentBackStackEntryAsState()
     val currentRoute = currentBackStack.value?.destination?.route
-    LaunchedEffect(Unit){
 
-        Log.d("IN MAIN MAU", "${AudioPlayer.isActive}")
+    // this is to launch the thread in the whole app so that once
+    // the timer has been started it is always on
+    LaunchedEffect(Unit){
         AudioPlayer.isActive
             .filter { it == true }
             .collect {
