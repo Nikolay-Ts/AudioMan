@@ -37,6 +37,7 @@ import com.sonnenstahl.audioman.utils.DEFAULT_IMAGE_URI
 import com.sonnenstahl.audioman.utils.DEFAULT_LIGHT_IMAGE
 import com.sonnenstahl.audioman.utils.loadSound
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
 import java.io.File
 
@@ -136,7 +137,13 @@ fun HomeScreen(navController: NavController) {
         currentSound.value = loadSound(context, CURRENT_SOUND_PATH)
     }
 
+
+
     LaunchedEffect(isPlaying.value) {
+        AudioPlayer
+            .sleepTimeMilli
+            .filter { it == 0L }
+            .collect { isPlaying.value = false }
         when (isPlaying.value) {
             true -> AudioPlayer.play()
             false -> AudioPlayer.pause()

@@ -82,12 +82,14 @@ object AudioPlayer {
 
                 Log.d("TIME-LEFT", "${sleepTimeMilli.value / 1000L}")
             }
-            Log.d("TIME-LEFT", "jobs done")
-            mutex.withLock {
-                withContext(Dispatchers.Main) {
-                    getPlayer()?.pause()
+
+            if (sleepTimeMilli.value == 0L) {
+                mutex.withLock {
+                    withContext(Dispatchers.Main) {
+                        getPlayer()?.pause()
+                    }
+                    isActive.value = false
                 }
-                isActive.value = false
             }
         }
     }
@@ -135,7 +137,7 @@ object AudioPlayer {
 
 
     private var sound: Noise? = null
-    private var sleepTimeMilli = MutableStateFlow(0L)
+    var sleepTimeMilli = MutableStateFlow(-1L)
     var isActive = MutableStateFlow(false)
     private var sleepTimerJob: Job? = null
     private val timerCoroutine = CoroutineScope(Dispatchers.Default + Job())
