@@ -4,14 +4,22 @@
     <selectionStates>
       <SelectionState runConfigName="AudioMan">
         <option name="selectionMode" value="DROPDOWN" />
-        <DropdownSelection timestamp="2025-06-29T11:16:21.574074Z">
+        <DropdownSelection timestamp="2025-07-02T16:20:11.421466Z">
           <Target type="DEFAULT_BOOT">
             <handle>
-              <DeviceId pluginId="LocalEmulator" identifier="path=/Users/nik/.android/avd/Pixel_7_Pro_API_36.avd" />
+              <DeviceId pluginId="PhysicalDevice" identifier="serial=R5CW70576JZ" />
             </handle>
           </Target>
         </DropdownSelection>
-        <DialogSelection />
+        <DialogSelection>
+          <targets>
+            <Target type="DEFAULT_BOOT">
+              <handle>
+                <DeviceId pluginId="LocalEmulator" identifier="path=/Users/nik/.android/avd/Pixel_7_Pro_API_36.avd" />
+              </handle>
+            </Target>
+          </targets>
+        </DialogSelection>
       </SelectionState>
       <SelectionState runConfigName="AudioManWidgetConfigureActivity">
         <option name="selectionMode" value="DROPDOWN" />

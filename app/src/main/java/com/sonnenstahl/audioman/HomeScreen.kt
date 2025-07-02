@@ -140,10 +140,6 @@ fun HomeScreen(navController: NavController) {
 
 
     LaunchedEffect(isPlaying.value) {
-        AudioPlayer
-            .sleepTimeMilli
-            .filter { it == 0L }
-            .collect { isPlaying.value = false }
         when (isPlaying.value) {
             true -> AudioPlayer.play()
             false -> AudioPlayer.pause()
