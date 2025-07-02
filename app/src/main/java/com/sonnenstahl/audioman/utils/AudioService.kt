@@ -14,8 +14,8 @@ import androidx.media3.session.MediaSession
 import androidx.media3.session.MediaSessionService
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.MutableStateFlow
+
+import kotlinx.coroutines.launch
 
 class AudioService : MediaSessionService() {
     private lateinit var player: ExoPlayer
@@ -25,9 +25,21 @@ class AudioService : MediaSessionService() {
     override fun onCreate() {
         super.onCreate()
 
+        // Initialize the ExoPlayer
         player = ExoPlayer.Builder(this).build()
 
-        player = ExoPlayer.Builder(this).build()
+        // Add a listener to the player to observe playback state changes
+        player.addListener(object : Player.Listener {
+            override fun onIsPlayingChanged(isPlaying: Boolean) {
+                super.onIsPlayingChanged(isPlaying)
+                // Update the AudioPlayer's isPlaying state on the main dispatcher
+                CoroutineScope(Dispatchers.Main).launch {
+                    AudioPlayer.isPlaying.value = isPlaying
+                }
+            }
+        })
+
+        // Build the MediaSession
         session = MediaSession.Builder(this, player).setId("AudioManSession").build()
         mediaSessionCompat = MediaSessionCompat(this, "AudioManCompatSession")
         mediaSessionCompat.isActive = true
@@ -53,7 +65,6 @@ class AudioService : MediaSessionService() {
         var instance: AudioService? = null
             private set
     }
-
 
     private fun buildPlaceholderNotification(): Notification {
         val channelId = "audioman_playback_channel"
