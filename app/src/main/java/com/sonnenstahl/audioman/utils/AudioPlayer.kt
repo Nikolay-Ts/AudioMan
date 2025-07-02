@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.util.Log
+import android.util.MutableFloat
 import androidx.annotation.RequiresApi
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
@@ -60,6 +61,7 @@ object AudioPlayer {
             }
 
             this.sound = sound
+            this.isPlaying.value = true
         }
     }
 
@@ -84,10 +86,10 @@ object AudioPlayer {
             }
 
             if (sleepTimeMilli.value == 0L) {
+                withContext(Dispatchers.Main) {
+                    pause()
+                }
                 mutex.withLock {
-                    withContext(Dispatchers.Main) {
-                        getPlayer()?.pause()
-                    }
                     isActive.value = false
                 }
             }
@@ -97,12 +99,14 @@ object AudioPlayer {
     suspend fun pause() {
         mutex.withLock {
             getPlayer()?.pause()
+            isPlaying.value = false
         }
     }
 
     suspend fun play() {
         mutex.withLock {
             getPlayer()?.play()
+            isPlaying.value = true
         }
     }
 
@@ -139,6 +143,7 @@ object AudioPlayer {
     private var sound: Noise? = null
     var sleepTimeMilli = MutableStateFlow(-1L)
     var isActive = MutableStateFlow(false)
+    var isPlaying = MutableStateFlow(false)
     private var sleepTimerJob: Job? = null
     private val timerCoroutine = CoroutineScope(Dispatchers.Default + Job())
     private var mutex: Mutex = Mutex()

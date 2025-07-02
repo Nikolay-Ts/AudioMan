@@ -43,14 +43,6 @@ import kotlin.math.cos
 import kotlin.math.roundToInt
 import kotlin.math.sin
 
-fun normalizeAngle360(angle: Float): Float {
-    var normalized = angle % 360f
-    if (normalized < 0) {
-        normalized += 360f
-    }
-    return normalized
-}
-
 fun normalizeAngle(angle: Float, startRange: Float = -180f, endRange: Float = 180f): Float {
     var result = angle
     val range = endRange - startRange

@@ -27,6 +27,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
 import com.sonnenstahl.audioman.ui.theme.LightTeal
@@ -52,14 +53,14 @@ fun HomeScreen(navController: NavController) {
     val coroutinScope = rememberCoroutineScope()
     val darkMode = isSystemInDarkTheme()
 
-    var isPlaying = remember { mutableStateOf(AudioPlayer.isPlaying()) }
+    val isPlaying by AudioPlayer.isPlaying.collectAsStateWithLifecycle()
     val currentlyPlaying = remember { mutableStateOf(AudioPlayer.getSound()) }
     val volume = rememberSaveable { mutableStateOf(AudioPlayer.getVolume()) }
     var imagePath by remember { mutableStateOf(DEFAULT_IMAGE_URI) }
     val currentSound = remember { mutableStateOf(loadSound(context, CURRENT_SOUND_PATH)) }
 
     val imageSize by animateDpAsState(
-        targetValue = if (isPlaying.value) PLAYING_IMAGE_SIZE.dp else PAUSED_IMAGE_SIZE.dp,
+        targetValue = if (isPlaying) PLAYING_IMAGE_SIZE.dp else PAUSED_IMAGE_SIZE.dp,
         label = "imageSizeAnimation",
     )
 
@@ -135,15 +136,6 @@ fun HomeScreen(navController: NavController) {
     LaunchedEffect(Unit) {
         AudioPlayer.initialize(context)
         currentSound.value = loadSound(context, CURRENT_SOUND_PATH)
-    }
-
-
-
-    LaunchedEffect(isPlaying.value) {
-        when (isPlaying.value) {
-            true -> AudioPlayer.play()
-            false -> AudioPlayer.pause()
-        }
     }
 
     if (displayTimer.value) {
@@ -307,7 +299,7 @@ fun HomeScreen(navController: NavController) {
 
             Spacer(modifier = Modifier.height(10.dp))
 
-            AnimatedPause(isPlaying.value) {
+            AnimatedPause(isPlaying) {
                 if (currentlyPlaying.value.id == "-1") { // fallback id
                     val vibrator =
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
@@ -321,7 +313,12 @@ fun HomeScreen(navController: NavController) {
                     return@AnimatedPause
                 }
 
-                isPlaying.value = !isPlaying.value
+                coroutinScope.launch {
+                    when (isPlaying) {
+                        true -> AudioPlayer.pause()
+                        false -> AudioPlayer.play()
+                    }
+                }
             }
         }
     }
