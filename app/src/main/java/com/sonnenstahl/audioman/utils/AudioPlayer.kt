@@ -10,8 +10,11 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.core.net.toUri
-import androidx.media3.common.MediaItem
-import androidx.media3.common.Player
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.preferencesDataStore
+import com.sonnenstahl.audioman.HomeWidget
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -24,6 +27,11 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
+import androidx.glance.appwidget.updateAll
+import androidx.media3.common.MediaItem
+import androidx.media3.common.Player
+import androidx.glance.appwidget.updateAll
+
 
 
 object AudioPlayer {
@@ -61,8 +69,10 @@ object AudioPlayer {
             }
 
             this.sound = sound
+            this.soundFlow.value = sound
             this.isPlaying.value = true
         }
+
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
@@ -123,6 +133,7 @@ object AudioPlayer {
 
     fun clearSound() {
         sound = null
+        soundFlow.value = fallBackSound
     }
 
     suspend fun turnOnTimer(timeMilli: Long) {
@@ -140,6 +151,7 @@ object AudioPlayer {
     private var sound: Noise? = null
     var sleepTimeMilli = MutableStateFlow(-1L)
     var isActive = MutableStateFlow(false)
+    var soundFlow = MutableStateFlow(fallBackSound)
     var isPlaying = MutableStateFlow(false)
     private var sleepTimerJob: Job? = null
     private val timerCoroutine = CoroutineScope(Dispatchers.Default + Job())

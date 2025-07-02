@@ -31,11 +31,11 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
     }
     kotlinOptions {
-        jvmTarget = "1.8"
+        jvmTarget = "11"
     }
     buildFeatures {
         compose = true
@@ -55,12 +55,13 @@ dependencies {
     implementation("androidx.core:core-ktx:1.13.1")
     implementation("androidx.compose.runtime:runtime:1.8.3")
     implementation("androidx.glance:glance-appwidget:1.1.1")
-    implementation("androidx.glance:glance:1.0.0")
-    implementation("androidx.datastore:datastore-preferences:1.0.0")
+    implementation("androidx.glance:glance:1.1.1")
+    implementation("androidx.datastore:datastore-preferences:1.1.7")
+    implementation("androidx.datastore:datastore-preferences-rxjava3:1.1.7")
     implementation("androidx.compose.material:material:1.6.1")
     implementation("androidx.media:media:1.6.0")
     implementation("org.apache.commons:commons-math3:3.6.1")
-    implementation("androidx.media3:media3-session:1.3.1")
+    implementation("androidx.media3:media3-session:1.7.1")
     implementation("io.coil-kt:coil-compose:2.2.2")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.2")
     implementation("androidx.media3:media3-exoplayer:1.7.1")
