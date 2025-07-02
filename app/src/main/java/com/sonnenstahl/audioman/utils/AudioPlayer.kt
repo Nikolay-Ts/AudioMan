@@ -69,9 +69,6 @@ object AudioPlayer {
     fun countDown(
     ) {
         sleepTimerJob?.cancel()
-
-        Log.d("TIME-LEFT", "$sleepTimeMilli before loop")
-
         sleepTimerJob =  timerCoroutine.launch {
             Log.d("TIME-LEFT", "$sleepTimeMilli before loop")
             while (sleepTimeMilli.value != 0L && isActive.value) {

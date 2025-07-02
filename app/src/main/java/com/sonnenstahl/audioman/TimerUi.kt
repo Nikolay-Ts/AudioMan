@@ -65,15 +65,11 @@ fun TimerUi(
 ) {
     val darkMode = isSystemInDarkTheme()
     val maxMinutes = 90
-
     val audioPlayerCurrentRemainingMillis by AudioPlayer.sleepTimeMilli.collectAsStateWithLifecycle()
     val audioPlayerIsActive by AudioPlayer.isActive.collectAsStateWithLifecycle()
-
     var setMinutes by rememberSaveable { mutableStateOf(initialMinutes.coerceIn(0, maxMinutes)) }
     var initialTotalSetMinutes by rememberSaveable { mutableStateOf(initialMinutes.coerceIn(0, maxMinutes)) }
-
     var isDragging by rememberSaveable { mutableStateOf(false) }
-
     var touchOffsetFromHandle by remember { mutableStateOf(0f) }
 
 
@@ -127,9 +123,7 @@ fun TimerUi(
 
     val startAngle = -215f
     val sweepAngle = 250f
-    val endAngle = startAngle + sweepAngle
 
-    // CALCULATE dialProgressValue HERE, within the Composable scope
     val dialProgressValue = remember(audioPlayerCurrentRemainingMillis, audioPlayerIsActive, setMinutes, maxMinutes) {
         if (audioPlayerIsActive) {
             audioPlayerCurrentRemainingMillis.toFloat() / (maxMinutes * 60 * 1000L).coerceAtLeast(1L)
@@ -242,12 +236,12 @@ fun TimerUi(
         val displayText =
             remember(audioPlayerCurrentRemainingMillis, audioPlayerIsActive, setMinutes, isDragging) {
                 if (isDragging || !audioPlayerIsActive) {
-                    String.format("%02d:00", setMinutes)
+                    "%02d:00".format(setMinutes)
                 } else {
                     val totalSeconds = audioPlayerCurrentRemainingMillis / 1000L
                     val minutes = totalSeconds / 60
                     val seconds = totalSeconds % 60
-                    String.format("%02d:%02d", minutes, seconds)
+                    "%02d:%02d".format(minutes, seconds)
                 }
             }
 
@@ -304,8 +298,7 @@ fun TimerUi(
                 text =
                     when {
                         audioPlayerIsActive -> "Stop"
-                        audioPlayerCurrentRemainingMillis > 0L -> "Start"
-                        else -> "Restart"
+                        else -> "Start"
                     },
             )
         }

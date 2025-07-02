@@ -35,7 +35,10 @@ import com.sonnenstahl.audioman.utils.saveCustomSound
 import com.sonnenstahl.audioman.utils.saveSound
 import com.sonnenstahl.audioman.utils.updateGraphData
 import com.sonnenstahl.audioman.utils.writeWav
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.io.File
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -44,7 +47,6 @@ fun CustomNoise() {
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
     val isDarkTheme    = isSystemInDarkTheme()
-
     var customNoiseData by remember {
         mutableStateOf(loadCustomSound(context, CUSTOM_SOUND_PATH) ?: CustomNoise("White", 0.5f, 0.5f, ByteArray(size = 44100 * 2)))
     }
@@ -67,7 +69,7 @@ fun CustomNoise() {
         }
 
     LaunchedEffect(noiseType, amplitude, spectrum) {
-        coroutineScope.launch {
+        withContext(Dispatchers.Main) {
             val newSamples =
                 generateNoiseSamples(
                     noiseType,
@@ -187,47 +189,48 @@ fun CustomNoise() {
                     .padding(16.dp),
         ) {
             coroutineScope.launch {
-                if (currentSound.value.id == "-2" && isPlaying) {
-                    AudioPlayer.pause()
-                } else if (isPlaying == true) {
-                    AudioPlayer.pause()
-                } else {
-                    val file = File(context.cacheDir, "generated_noise.wav")
-                    val sampleRate = 44100
-                    val durationSec = 1
+                withContext(Dispatchers.Main) {
+                    if (currentSound.value.id == "-2" && isPlaying) {
+                        AudioPlayer.pause()
+                    } else if (isPlaying == true) {
+                        AudioPlayer.pause()
+                    } else {
+                        val file = File(context.cacheDir, "generated_noise.wav")
+                        val sampleRate = 44100
+                        val durationSec = 1
+                        val newSamples =
+                            generateNoiseSamples(
+                                noiseType,
+                                amplitude,
+                                spectrum,
+                                sampleRate,
+                                durationSec,
+                            )
 
-                    val newSamples =
-                        generateNoiseSamples(
-                            noiseType,
-                            amplitude,
-                            spectrum,
-                            sampleRate,
-                            durationSec,
-                        )
-                    previewSamples.value = newSamples
+                        previewSamples.value = newSamples
 
-                    val path = writeWav(newSamples, sampleRate, file)
+                        val path = writeWav(newSamples, sampleRate, file)
+                        val generatedNoise =
+                            Noise(
+                                "-2",
+                                "Generated Noise",
+                                "Noise generated via sliders",
+                                path,
+                            )
 
-                    val generatedNoise =
-                        Noise(
-                            "-2",
-                            "Generated Noise",
-                            "Noise generated via sliders",
-                            path,
-                        )
+                        val updatedCustomNoise =
+                            CustomNoise(
+                                noiseType,
+                                amplitude,
+                                spectrum,
+                                newSamples,
+                            )
+                        saveCustomSound(context, updatedCustomNoise, CUSTOM_SOUND_PATH)
+                        saveSound(context, generatedNoise, CURRENT_SOUND_PATH)
 
-                    val updatedCustomNoise =
-                        CustomNoise(
-                            noiseType,
-                            amplitude,
-                            spectrum,
-                            newSamples,
-                        )
-                    saveCustomSound(context, updatedCustomNoise, CUSTOM_SOUND_PATH)
-                    saveSound(context, generatedNoise, CURRENT_SOUND_PATH)
-
-                    AudioPlayer.initialize(context)
-                    AudioPlayer.playAsset(context, generatedNoise)
+                        AudioPlayer.initialize(context)
+                        AudioPlayer.playAsset(context, generatedNoise)
+                    }
                 }
             }
         }
