@@ -15,6 +15,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.sonnenstahl.audioman.ui.theme.Brown
 import com.sonnenstahl.audioman.ui.theme.DarkPlotBackGround
 import com.sonnenstahl.audioman.ui.theme.LightBrown
@@ -51,7 +52,7 @@ fun CustomNoise() {
     var amplitude by rememberSaveable { mutableFloatStateOf(customNoiseData.amplitude) }
     var spectrum by rememberSaveable { mutableFloatStateOf(customNoiseData.spectrum) }
     val previewSamples = remember { mutableStateOf(customNoiseData.samples) }
-    val isPlaying = remember { mutableStateOf(AudioPlayer.isPlaying()) }
+    val isPlaying by AudioPlayer.isPlaying.collectAsStateWithLifecycle()
     val currentSound = remember { mutableStateOf(AudioPlayer.getSound()) }
     val targetLineColor =
         remember(noiseType, isDarkTheme) {
@@ -178,7 +179,7 @@ fun CustomNoise() {
 
         // This is the ONLY place where playback should be initiated or paused
         AnimatedPause(
-            isPlaying = isPlaying.value,
+            isPlaying = isPlaying,
             size = 200,
             modifier =
                 Modifier
@@ -186,14 +187,11 @@ fun CustomNoise() {
                     .padding(16.dp),
         ) {
             coroutineScope.launch {
-                if (currentSound.value.id == "-2" && isPlaying.value) {
+                if (currentSound.value.id == "-2" && isPlaying) {
                     AudioPlayer.pause()
-                    isPlaying.value = false
-                } else if (isPlaying.value == true) {
+                } else if (isPlaying == true) {
                     AudioPlayer.pause()
-                    isPlaying.value = false
                 } else {
-                    isPlaying.value = true
                     val file = File(context.cacheDir, "generated_noise.wav")
                     val sampleRate = 44100
                     val durationSec = 1
