@@ -71,6 +71,8 @@ object AudioPlayer {
             this.sound = sound
             this.soundFlow.value = sound
             this.isPlaying.value = true
+
+            HomeWidget().updateAll(context)
         }
 
     }
