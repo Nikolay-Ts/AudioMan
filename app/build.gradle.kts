@@ -56,6 +56,7 @@ dependencies {
     implementation("androidx.compose.runtime:runtime:1.8.3")
     implementation("androidx.glance:glance-appwidget:1.1.1")
     implementation("androidx.glance:glance:1.1.1")
+    implementation("androidx.exifinterface:exifinterface:1.4.1")
     implementation("androidx.datastore:datastore-preferences:1.1.7")
     implementation("androidx.datastore:datastore-preferences-rxjava3:1.1.7")
     implementation("androidx.compose.material:material:1.6.1")
