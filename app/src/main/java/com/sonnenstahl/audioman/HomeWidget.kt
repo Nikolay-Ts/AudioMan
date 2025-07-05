@@ -3,6 +3,7 @@ package com.sonnenstahl.audioman
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.Matrix
 import android.net.Uri // Import Uri for parsing paths
 import android.os.Build
 import android.os.VibrationEffect
@@ -67,7 +68,6 @@ class HomeWidget : GlanceAppWidget() {
 fun Hello() {
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
-
     val sound = AudioPlayer.soundFlow.collectAsState()
     val isPLaying = AudioPlayer.isPlaying.collectAsState()
     val playPauseIcon = if (isPLaying.value) R.drawable.pause else R.drawable.play
@@ -85,21 +85,20 @@ fun Hello() {
                 Log.e("HomeWidget", "Failed to parse URI from path: $currentImagePath", e)
                 null
             }
-
             if (uri != null && uri.scheme == "content") {
                 try {
-                    // Open stream for bounds calculation
                     context.contentResolver.openInputStream(uri)?.use { initialStream ->
-                        val inSampleSize = calculateInSampleSize(initialStream, 150, 150) // Adjust target size for widget
-
-                        // Open NEW stream for actual bitmap decode
+                        val inSampleSize = calculateInSampleSize(initialStream, 150, 150)
                         context.contentResolver.openInputStream(uri)?.use { finalStream ->
                             val options = BitmapFactory.Options()
                             options.inSampleSize = inSampleSize
                             val bitmap = BitmapFactory.decodeStream(finalStream, null, options)
                             if (bitmap != null) {
                                 Log.d("HomeWidget", "Successfully loaded bitmap from URI: $uri (size: ${bitmap.width}x${bitmap.height}, inSampleSize: ${inSampleSize})")
-                                ImageProvider(bitmap)
+                                val matrix = Matrix()
+                                matrix.postRotate(90F)
+                                val rotated =  Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true)
+                                ImageProvider(rotated)
                             } else {
                                 Log.e("HomeWidget", "Failed to decode bitmap from URI: $uri. Using default.")
                                 ImageProvider(R.drawable.default_black)
@@ -121,22 +120,20 @@ fun Hello() {
                     ImageProvider(R.drawable.default_black)
                 }
             } else {
-                // Assume it's a file path if not a content URI
                 val imageFile = File(currentImagePath)
                 if (imageFile.exists() && imageFile.isFile) {
                     try {
-                        // For files, we can open a new stream or pass the file path twice.
-                        // Passing the file path to calculateInSampleSize (implicitly creates stream)
-                        // and then decodeFile is generally robust for files.
-                        val inSampleSize = calculateInSampleSize(imageFile.inputStream(), 150, 150) // Adjust target size
-
+                        val inSampleSize = calculateInSampleSize(imageFile.inputStream(), 150, 150)
                         val options = BitmapFactory.Options()
                         options.inSampleSize = inSampleSize
                         val bitmap = BitmapFactory.decodeFile(imageFile.absolutePath, options)
 
                         if (bitmap != null) {
                             Log.d("HomeWidget", "Successfully loaded bitmap from file: ${imageFile.absolutePath} (size: ${bitmap.width}x${bitmap.height}, inSampleSize: ${inSampleSize})")
-                            ImageProvider(bitmap)
+                            val matrix = Matrix()
+                            matrix.postRotate(90F)
+                            val rotated =  Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true)
+                            ImageProvider(rotated)
                         } else {
                             Log.e("HomeWidget", "Failed to decode bitmap from file: ${imageFile.absolutePath}. Using default.")
                             ImageProvider(R.drawable.default_black)
