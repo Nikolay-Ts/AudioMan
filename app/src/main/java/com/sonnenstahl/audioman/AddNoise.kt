@@ -7,7 +7,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.* // Ensure you are importing from material3
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
@@ -20,8 +20,10 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.core.net.toUri
+import androidx.glance.appwidget.updateAll
 import com.sonnenstahl.audioman.ui.theme.Teal
 import com.sonnenstahl.audioman.utils.*
+import kotlinx.coroutines.launch
 import java.io.File
 
 @Composable
@@ -34,6 +36,7 @@ fun AddNoise(
     val context = LocalContext.current
     val keyboard = LocalSoftwareKeyboardController.current
     // Initialize title and description with default values if currentSound is null
+    val coroutinScope = rememberCoroutineScope()
     val title = remember { mutableStateOf(currentSound.value?.title ?: "") }
     val description = remember { mutableStateOf(currentSound.value?.description ?: "") }
     val audioUri =
@@ -344,7 +347,6 @@ fun AddNoise(
                             }
 
                             val index = soundsList.indexOfFirst { it.id == newNoise.id }
-
                             if (index != -1) {
                                 soundsList[index] = newNoise
                             } else {
@@ -352,6 +354,10 @@ fun AddNoise(
                             }
 
                             saveSounds(context, soundsList, SOUNDS_FILE_PATH)
+                            coroutinScope.launch {
+                                HomeWidget().updateAll(context)
+                            }
+
                             // reset fields for next use
                             title.value = ""
                             description.value = ""

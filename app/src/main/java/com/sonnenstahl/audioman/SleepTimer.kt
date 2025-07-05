@@ -46,13 +46,14 @@ fun SleepTimer(
             ) {
                 Text(
                     text = "Adjust Sleep Timer",
+                    color = if (darkMode) DarkPlotBackGround else LightPlotBackGround,
                     style = MaterialTheme.typography.h6,
                 )
 
                 TimerUi(
                     context,
                     initialMinutes = 10,
-                    handleColor = if (darkMode) LightPlotBackGround else DarkPlotBackGround,
+                    handleColor = if (darkMode) DarkPlotBackGround else LightPlotBackGround,
                     inactiveBarColor = Color.LightGray,
                     activeBarColor = if (darkMode) Teal else LightTeal,
                     modifier = Modifier.size(250.dp),
