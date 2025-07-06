@@ -18,7 +18,7 @@ The beauty of covers is that it makes your track, yours and gives you a more uni
 
 The Library is where the user can see all of their tracks including the following that come with the app by default.
 
-1. Chilling in a caffe
+1. Chilling in a café
 2. Rain falling down
 3. Stuck in the middle of the forest
 4. Chilling by the campfire 
