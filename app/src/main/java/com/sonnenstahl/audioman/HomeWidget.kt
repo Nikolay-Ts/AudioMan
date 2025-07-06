@@ -67,7 +67,7 @@ class HomeWidget : GlanceAppWidget() {
         id: GlanceId,
     ) {
         provideContent {
-            Hello()
+            Widget()
         }
     }
 }
@@ -81,7 +81,7 @@ class HomeWidget : GlanceAppWidget() {
  */
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun Hello() {
+fun Widget() {
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
     val sound = AudioPlayer.soundFlow.collectAsState()

@@ -1,14 +1,9 @@
 package com.sonnenstahl.audioman
 
-import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
-import android.util.Log
-import android.widget.Toast
 import androidx.activity.ComponentActivity
-import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -25,15 +20,7 @@ import androidx.navigation.compose.rememberNavController
 import com.sonnenstahl.audioman.ui.theme.AudioManTheme
 import com.sonnenstahl.audioman.utils.AudioPlayer
 import com.sonnenstahl.audioman.utils.Router
-import kotlinx.coroutines.flow.distinctUntilChanged
-import androidx.compose.runtime.collectAsState
 import kotlinx.coroutines.flow.filter
-import androidx.core.content.ContextCompat
-import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.distinctUntilChanged
-import android.Manifest
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.compose.ui.platform.LocalContext
 
 class MainActivity : ComponentActivity() {
     @RequiresApi(Build.VERSION_CODES.O)
@@ -56,7 +43,6 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun AppNavigation() {
     val navController = rememberNavController()
-    val context = LocalContext.current
     val currentBackStack = navController.currentBackStackEntryAsState()
     val currentRoute = currentBackStack.value?.destination?.route
 
