@@ -6,6 +6,7 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -22,9 +23,9 @@ fun Library() {
     val popUpDialog = remember { mutableStateOf(false) }
     val customSounds = remember { mutableStateListOf<Noise>() }
     val currentNoise = remember { mutableStateOf<Noise?>(null) }
-    val recomposeCounter = remember { mutableIntStateOf(0) } // Used to trigger data reload
+    val stateList = rememberLazyListState()
 
-    LaunchedEffect(recomposeCounter.intValue) {
+    LaunchedEffect(Unit) {
         val loaded = loadSounds(context, SOUNDS_FILE_PATH)
         customSounds.clear()
         customSounds.addAll(loaded)
@@ -37,7 +38,6 @@ fun Library() {
     ) {
         currentNoise.value = null
         popUpDialog.value = false
-        recomposeCounter.intValue++
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
@@ -69,7 +69,6 @@ fun Library() {
                     sound = sound,
                     soundsList = customSounds,
                     currentSound = currentNoise,
-                    onSoundRemoved = { recomposeCounter.intValue++ },
                     openDialogTrigger = popUpDialog,
                     context = context,
                 )

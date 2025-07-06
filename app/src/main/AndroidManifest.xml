@@ -26,7 +26,7 @@
 
         <!-- Glance App Widget Receiver -->
         <receiver
-            android:name=".AudioManWidget"
+            android:name=".utils.AudioManWidget"
             android:exported="true"
             tools:ignore="Instantiatable">
             <intent-filter>
@@ -53,19 +53,10 @@
             android:name=".utils.AudioService"
             android:exported="true"
             android:foregroundServiceType="mediaPlayback">
-        <intent-filter>
-            <action android:name="androidx.media3.session.MediaSessionService" />
-        </intent-filter>
-    </service>
+            <intent-filter>
+                <action android:name="androidx.media3.session.MediaSessionService" />
+            </intent-filter>
+        </service>
 
-    <receiver android:name=".MediaWidgetReceiver"
-        android:exported="true">
-        <intent-filter>
-            <action android:name="android.appwidget.action.APPWIDGET_UPDATE"/>
-        </intent-filter>
-        <meta-data
-            android:name="android.appwidget.provider"
-            android:resource="@xml/audio_man_widget_info"/>
-    </receiver>
 </application>
     </manifest>

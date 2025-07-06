@@ -66,7 +66,6 @@ fun CustomSoundItem(
     sound: Noise,
     soundsList: SnapshotStateList<Noise>,
     currentSound: MutableState<Noise?>,
-    onSoundRemoved: () -> Unit,
     openDialogTrigger: MutableState<Boolean>,
     context: Context,
 ) {
@@ -99,7 +98,6 @@ fun CustomSoundItem(
                     }
 
                     soundsList.remove(sound)
-                    onSoundRemoved()
                     saveSounds(context, soundsList, SOUNDS_FILE_PATH)
 
                     val vibrator =
