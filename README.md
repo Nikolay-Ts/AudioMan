@@ -4,7 +4,7 @@
 
 ---
 
-**AudioMan** is an app designed to help students and everyone study or focuses at the task at hand. When you first open the App the first thing you see is the current track alongside the track cover, which brings your tracks to life. If you want to download the apk
+**AudioMan** is an app designed to help students and everyone study or focus at the task at hand. When you first open the App the first thing you see is the current track alongside the track cover, which brings your tracks to life. If you want to download the apk
 go to the [releases](https://github.com/Nikolay-Ts/AudioMan/releases/tag/AudioMan).
 
 <p align="center">
@@ -16,7 +16,7 @@ The beauty of covers is that it makes your track, yours and gives you a more uni
 
 ## Library 
 
-The Library is where the user can see all of their tracks including the following that come with the app!
+The Library is where the user can see all of their tracks including the following that come with the app by default.
 
 1. Chilling in a caffe
 2. Rain falling down
@@ -24,13 +24,13 @@ The Library is where the user can see all of their tracks including the followin
 4. Chilling by the campfire 
 5. Stuck in traffic
 
-AudioMan Also allows the user to upload their own `track`, give it a unique name and bring it to life with its own `track cover`. 
+AudioMan also allows the user to upload their own `track`, give it a unique name and bring it to life with its own `track cover`. 
 
 <p align="center">
   <img src="./app/src/main/assets/library.jpg" alt="dog-play" width="150"/>
 </p>
 
-User by swiping and long pressing users can edit their track or delete and remove it from the library if they no longer feel the vibe.
+By swiping and long pressing users can edit their track or delete and remove it from the library if they no longer feel the vibe.
 <p align="center">
   <img src="./app/src/main/assets/delete-track.jpg" alt="dog-play" width="150"/>
   <img src="./app/src/main/assets/edit-track.jpg" alt="dog-pause" width="150"/>
@@ -38,7 +38,7 @@ User by swiping and long pressing users can edit their track or delete and remov
 
 ## Custom, Real Time, White Noise
 
-AudioMan also has options for users that prefer track that are calmer and more predictable. AudioMan has designed the **white noise** section for those users. 
+AudioMan also has options for users that prefer tracks that are calmer and more predictable. AudioMan has designed the **white noise** section for those users. 
 
 Users can chose to play either a white, <span style="color: pink;">pink</span> or  <span style="color: burlywood;">brown</span> noises. The users can also chose the amplitude and frequency to customize the type of noise the to the user's exact need and mood.
 
@@ -79,7 +79,7 @@ This makes it easy as you have all audio widget place in one stack
 ## Sleep timer and persistent thread
 
 For this project the biggest challenge for AudioMan was to synchronize the AudioPlayer.
-The AudiPlayer had two main component that were modifier and read by almost all views are 
+The AudiPlayer had two main component that were modified and read by almost all views are 
 isPlaying and the sound. I needed to use stateFLows to and mutexes to make sure that no 
 race conditions would happen. When creating the timer the problem was that when I left
 the TimerUI the coroutine that launched `AudioPlayer.Countdown` function would go out of scope
@@ -107,7 +107,7 @@ but for the custom ones that created a re-rendering issue as the foreach functio
 when to re-render things. This was a problem as when I deleted an item it would get removed from
 the mutable list but the user would not reopen the library screen to see the changes. 
 
-to fix this I had to refactor the whole page to use a LazyColumn which is perfect as it dynamically
+To fix this I had to refactor the whole page to use a LazyColumn which is perfect as it dynamically
 re-renders the components and is perfect for such tasks
 
 ## Widget 
