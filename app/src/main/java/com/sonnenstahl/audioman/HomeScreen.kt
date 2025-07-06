@@ -36,14 +36,11 @@ import com.sonnenstahl.audioman.utils.AudioPlayer
 import com.sonnenstahl.audioman.utils.CURRENT_SOUND_PATH
 import com.sonnenstahl.audioman.utils.DEFAULT_IMAGE_URI
 import com.sonnenstahl.audioman.utils.DEFAULT_LIGHT_IMAGE
+import com.sonnenstahl.audioman.utils.PAUSED_IMAGE_SIZE
+import com.sonnenstahl.audioman.utils.PLAYING_IMAGE_SIZE
 import com.sonnenstahl.audioman.utils.loadSound
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
 import java.io.File
-
-const val PLAYING_IMAGE_SIZE: Int = 250
-const val PAUSED_IMAGE_SIZE: Int = (PLAYING_IMAGE_SIZE * 0.75).toInt()
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable

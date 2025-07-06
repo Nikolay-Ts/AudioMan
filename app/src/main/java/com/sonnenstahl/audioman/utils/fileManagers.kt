@@ -11,12 +11,6 @@ import java.io.File
 import java.io.FileNotFoundException
 import java.io.FileOutputStream
 
-const val SOUNDS_FILE_PATH: String = "sounds.json"
-const val CURRENT_SOUND_PATH: String = "current.json"
-const val CUSTOM_SOUND_PATH: String = "custom.json"
-
-// TODO: add all of the serialisation of the data class Sounds
-
 /**
  * because it is URI based, this works for both sound and images
  */

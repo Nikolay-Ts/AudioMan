@@ -3,10 +3,6 @@ package com.sonnenstahl.audioman.utils
 import kotlinx.serialization.Serializable
 import java.util.UUID
 
-const val DEFAULT_AUDIO_URI: String = "default.m4a"
-const val DEFAULT_IMAGE_URI: String = "default.png"
-const val DEFAULT_LIGHT_IMAGE: String = "default_white.png"
-
 @Serializable
 data class Noise(
     val id: String = UUID.randomUUID().toString(),
