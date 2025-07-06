@@ -40,6 +40,13 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
 
+/**
+ * @brief the screen to create a custom White, Pink or Brown noise. The UI has a live graph
+ * to show the current sound, along side sliders to modify it. When play is pressed with a changes
+ * to the custom sound, it generates a new sound, saves to disk and loads it alongside displaying it
+ * on the graph.
+ *
+ */
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun CustomNoise() {
@@ -54,7 +61,7 @@ fun CustomNoise() {
     var spectrum by rememberSaveable { mutableFloatStateOf(customNoiseData.spectrum) }
     val previewSamples = remember { mutableStateOf(customNoiseData.samples) }
     val isPlaying by AudioPlayer.isPlaying.collectAsStateWithLifecycle()
-    val currentSound = remember { mutableStateOf(AudioPlayer.getSound()) }
+    val currentSound by AudioPlayer.soundFlow.collectAsStateWithLifecycle()
     val targetLineColor =
         remember(noiseType, isDarkTheme) {
             mutableStateOf(
@@ -189,7 +196,7 @@ fun CustomNoise() {
         ) {
             coroutineScope.launch {
                 withContext(Dispatchers.Main) {
-                    if (currentSound.value.id == "-2" && isPlaying) {
+                    if (currentSound.id == "-2" && isPlaying) {
                         AudioPlayer.pause()
                     } else if (isPlaying == true) {
                         AudioPlayer.pause()

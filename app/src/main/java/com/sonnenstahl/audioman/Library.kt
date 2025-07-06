@@ -16,6 +16,11 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.sonnenstahl.audioman.utils.*
 
+/**
+ * @brief this is where all of the sounds are stored with the default ones being immutable.
+ * users can add their own ones by pressing the + button which will display AddNoise.kt. The user
+ * can also delete and modify the custom sounds by swiping and long pressing them.
+ */
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun Library() {
@@ -23,7 +28,6 @@ fun Library() {
     val popUpDialog = remember { mutableStateOf(false) }
     val customSounds = remember { mutableStateListOf<Noise>() }
     val currentNoise = remember { mutableStateOf<Noise?>(null) }
-    val stateList = rememberLazyListState()
 
     LaunchedEffect(Unit) {
         val loaded = loadSounds(context, SOUNDS_FILE_PATH)

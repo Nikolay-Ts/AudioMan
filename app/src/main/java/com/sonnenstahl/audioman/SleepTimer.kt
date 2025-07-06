@@ -20,6 +20,12 @@ import com.sonnenstahl.audioman.ui.theme.LightPlotBackGround
 import com.sonnenstahl.audioman.ui.theme.LightTeal
 import com.sonnenstahl.audioman.ui.theme.Teal
 
+/**
+ * @brief this displays the popup dialog to begin the sleep timer
+ *
+ * @param context of the current view
+ * @param onDismissRequest what to do when the user taps off (make the pop up dissapear usually)
+ */
 @Composable
 fun SleepTimer(
     context: Context,

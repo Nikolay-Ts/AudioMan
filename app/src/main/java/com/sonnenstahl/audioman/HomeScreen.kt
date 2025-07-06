@@ -26,7 +26,9 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
@@ -42,9 +44,15 @@ import com.sonnenstahl.audioman.utils.loadSound
 import kotlinx.coroutines.launch
 import java.io.File
 
+/**
+ * @brief this is the first thing the user sees. It has the current cover, and defaults ot the
+ * default images. Followed by the title and the description. The image changes in sizes
+ * to give an easier visual queue for when the audio is paused or played. Here the user
+ * can also access the sleep timer (SleepTimer.kt)
+ */
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun HomeScreen(navController: NavController) {
+fun HomeScreen() {
     val context = LocalContext.current
     val displayTimer = remember { mutableStateOf(false) }
     val coroutinScope = rememberCoroutineScope()
@@ -229,8 +237,25 @@ fun HomeScreen(navController: NavController) {
                     .padding(bottom = 20.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            Text(currentlyPlaying.value.title)
-            Text(currentlyPlaying.value.description)
+            var title = if (currentlyPlaying.value.title.length > 27) {
+                currentlyPlaying.value.title.take(25)+ "..."
+            } else {
+                currentlyPlaying.value.title
+            }
+
+            val description = if (currentlyPlaying.value.description.length > 35) {
+                currentlyPlaying.value.description.take(33)+ "..."
+            } else {
+                currentlyPlaying.value.description
+            }
+            Text(
+                text = title,
+                style = MaterialTheme.typography.headlineSmall.copy(
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 24.sp
+                )
+            )
+            Text(description)
 
             Spacer(modifier = Modifier.height(24.dp))
 

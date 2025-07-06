@@ -12,7 +12,13 @@ import java.io.FileNotFoundException
 import java.io.FileOutputStream
 
 /**
- * because it is URI based, this works for both sound and images
+ * @brief saves both images and audio files as uris to storage
+ *
+ * @param context of the current view
+ * @param uri the location of the image to be stored
+ * @param prefix this is set by me so that there is no claching in images
+ *
+ * @return String? the filepath if it was successful. If not, returns null
  */
 fun saveUri(
     context: Context,
@@ -41,6 +47,13 @@ fun saveUri(
         null
     }
 
+/**
+ * @brief saves the custom sounds in the library to disk
+ *
+ * @param context context of the current view
+ * @param sounds the custom sounds by the user to be saved
+ * @param filepath the localtion in storage to be saved
+ */
 fun saveSounds(
     context: Context,
     sounds: List<Noise>,
@@ -54,6 +67,14 @@ fun saveSounds(
     }
 }
 
+/**
+ * @brief load all the custom sounds as from disk
+ *
+ * @param context context of the view
+ * @param filepath should be the same as the one in which you used for saveSounds
+ *
+ * @return a mutable list of Sound. If the file was not found this list is empty
+ */
 fun loadSounds(
     context: Context,
     filepath: String,
@@ -67,6 +88,9 @@ fun loadSounds(
     }
 }
 
+/**
+ * @brief save a singular
+ */
 fun saveSound(
     context: Context,
     sounds: Noise,

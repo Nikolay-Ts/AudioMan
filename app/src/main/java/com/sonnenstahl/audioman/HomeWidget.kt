@@ -57,6 +57,9 @@ import com.sonnenstahl.audioman.utils.DEFAULT_LIGHT_IMAGE
 import androidx.core.net.toUri
 
 
+/**
+ * @brief widget to be displaye din the home screen. it is 4x1
+ */
 class HomeWidget : GlanceAppWidget() {
     @RequiresApi(Build.VERSION_CODES.O)
     override suspend fun provideGlance(
@@ -70,6 +73,12 @@ class HomeWidget : GlanceAppWidget() {
 }
 
 
+/**
+ * @brief the content of the image. It displays the current track cover,
+ * Along side the title description and the option to pause or play the current audio.
+ * if nothing is playing, the widget does not allow you to play or pause and gives the user
+ * visual feedback and a vibration
+ */
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun Hello() {
@@ -79,8 +88,8 @@ fun Hello() {
     val isPLaying = AudioPlayer.isPlaying.collectAsState()
     val playPauseIcon = if (isPLaying.value) R.drawable.pause else R.drawable.play
     val imageProvider: ImageProvider by produceState(
-        initialValue = ImageProvider(R.drawable.default_black), // Initial default value while loading
-        key1 = sound.value.imagePath // Re-run when imagePath changes
+        initialValue = ImageProvider(R.drawable.default_black),
+        key1 = sound.value.imagePath
     ) {
         value = withContext(Dispatchers.IO) {
             val currentImagePath = sound.value.imagePath
@@ -254,7 +263,8 @@ fun Hello() {
                 modifier =
                     GlanceModifier
                         .padding(start = 8.dp)
-                        .size(50.dp)
+                        .padding(horizontal = 5.dp)
+                        .size(60.dp)
                         .clickable {
                             if (sound.value.id == "-1") {
                                 val vibrator =

@@ -51,7 +51,17 @@ fun normalizeAngle(angle: Float, startRange: Float = -180f, endRange: Float = 18
     return result
 }
 
-
+/**
+ * @brief the slider that displays the time left and initialises the timer from AudioPlayer
+ *
+ * @param conext of the current view
+ * @param initialMinutes UI modifier if it were to be used elsewhere
+ * @param handleColor UI modifier if it were to be used elsewhere
+ * @param inactiveBarColor UI modifier if it were to be used elsewhere
+ * @param activeBarColor UI modifier if it were to be used elsewhere
+ * @param modifier UI modifier if it were to be used elsewhere
+ * @param strokeWidth UI modifier if it were to be used elsewhere
+ */
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun TimerUi(

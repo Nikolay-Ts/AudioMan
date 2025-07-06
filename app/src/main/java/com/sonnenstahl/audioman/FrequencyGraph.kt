@@ -1,8 +1,6 @@
 package com.sonnenstahl.audioman
 
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.ui.Modifier
@@ -10,6 +8,15 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 
+/**
+ * @brief displays the current custom noise wave to the user in a little graph for a nicer UI and
+ * more responsive experience
+ *
+ * @param smaples the sample rate in bytes
+ * @param lineColor either light grey, pink or brown. Changes if the user is in light mode
+ * @param gridColor either dark grey or light grey depending if the user is in light mode
+ * @param modifier to customise the size if it were to be reused in multiple screens
+ */
 @Composable
 fun FrequencyGraph(
     samples: ByteArray,

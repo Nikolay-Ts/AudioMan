@@ -89,7 +89,7 @@ fun AppNavigation() {
             startDestination = Router.Home.route,
             modifier = Modifier.padding(innerPadding),
         ) {
-            composable(Router.Home.route) { HomeScreen(navController) }
+            composable(Router.Home.route) { HomeScreen() }
             composable(Router.Sounds.route) { Library() }
             composable(Router.CustomNoise.route) { CustomNoise() }
         }

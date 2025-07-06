@@ -20,9 +20,16 @@ import androidx.glance.appwidget.updateAll
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 
-
-
+/**
+ * @brief a singleton that is the audioPlayer interface and is also the central
+ * storage of what is currently being played, the sleep timer and how many miliseconds
+ * until it goes off
+ */
 object AudioPlayer {
+
+    /**
+     * @brief initialise the player. Must be called before play, pause, playAsset
+     */
     @RequiresApi(Build.VERSION_CODES.O)
     fun initialize(context: Context) {
         // Start the MediaSessionService
@@ -30,6 +37,10 @@ object AudioPlayer {
         context.startForegroundService(intent)
     }
 
+    /**
+     * @brief plays the asset. Must be called the first time as it loads the asset in the Media
+     * of the M3 player
+     */
     @RequiresApi(Build.VERSION_CODES.O)
     suspend fun playAsset(
         context: Context,
@@ -65,6 +76,10 @@ object AudioPlayer {
 
     }
 
+    /**
+     * @brief begins the countdown timer by cancelling any older timers and launches a
+     * new timer in the Main thread so it persists across all screens
+     */
     @RequiresApi(Build.VERSION_CODES.O)
     fun countDown(
     ) {
@@ -93,6 +108,9 @@ object AudioPlayer {
         }
     }
 
+    /**
+     * @brief pause the current audio when possible
+     */
     suspend fun pause() {
         mutex.withLock {
             getPlayer()?.pause()
@@ -100,6 +118,9 @@ object AudioPlayer {
         }
     }
 
+    /**
+    * @brief play the current audio when possible
+    */
     suspend fun play() {
         mutex.withLock {
             getPlayer()?.play()
@@ -107,25 +128,50 @@ object AudioPlayer {
         }
     }
 
+    /**
+     * @brief A but deprecated now because of the isPlaying stateFlow
+     * @returns true if the player is play, false otherwise
+     */
     fun isPlaying(): Boolean = getPlayer()?.isPlaying == true
 
+    /**
+     * @brief gets the current sound or the fallback if nothing is on
+     * Again, this is a bit deprecated and might be removed as there is the soundFlow var
+     *
+     * @return Sound
+     */
     fun getSound(): Noise = sound ?: fallBackSound
 
-    fun setSound(noise: Noise?) {
-        sound = noise
-    }
 
+    /**
+     * @brief gets the current volume which is a float 0F..1F
+     *
+     * @return Float
+     */
     fun getVolume() = getPlayer()?.volume
 
+    /**
+     * @brief sets the volume of the AudioPlayer
+     *
+     * @param newVolume Float which should be in 0F..1F
+     */
     fun setVolume(newVolume: Float) {
         getPlayer()?.volume = newVolume
     }
 
+    /**
+     * @brief sets the current to null and the soundFlow to the fallbackSound
+     */
     fun clearSound() {
         sound = null
         soundFlow.value = fallBackSound
     }
 
+    /**
+     * @brief begins the timer and sets the timer length
+     *
+     * @param timeMilli Long the amount of time after which the AudioPlayer is paused
+     */
     suspend fun turnOnTimer(timeMilli: Long) {
         mutex.withLock {
             sleepTimeMilli.value = timeMilli
@@ -133,19 +179,23 @@ object AudioPlayer {
         }
     }
 
+    /**
+     * @brief pauses the timer but not the audio
+     */
     fun pauseTimer() {
         isActive.value = false
     }
 
-
-    private var sound: Noise? = null
     var sleepTimeMilli = MutableStateFlow(-1L)
     var isActive = MutableStateFlow(false)
     var soundFlow = MutableStateFlow(fallBackSound)
     var isPlaying = MutableStateFlow(false)
+
+
+
+    private var sound: Noise? = null
     private var sleepTimerJob: Job? = null
     private val timerCoroutine = CoroutineScope(Dispatchers.Default + Job())
     private var mutex: Mutex = Mutex()
-
     private fun getPlayer(): Player? = AudioService.instance?.getPlayer()
 }

@@ -37,6 +37,13 @@ import com.sonnenstahl.audioman.utils.saveSound
 import kotlinx.coroutines.launch
 import java.io.File
 
+/**
+ * @brief this is used to display the default and immutable sounds
+ *
+ * @param sound current sound
+ * @param context of the view
+ * @param isCustom to now how to display the images
+ */
 @RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalFoundationApi::class)
 @Composable

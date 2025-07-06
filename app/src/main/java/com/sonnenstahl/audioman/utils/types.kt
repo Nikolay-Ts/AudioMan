@@ -1,5 +1,8 @@
 package com.sonnenstahl.audioman.utils
 
+/**
+ * a central file to keep all of the const variables
+ */
 const val SOUNDS_FILE_PATH: String = "sounds.json"
 const val CURRENT_SOUND_PATH: String = "current.json"
 const val CUSTOM_SOUND_PATH: String = "custom.json"

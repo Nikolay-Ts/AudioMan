@@ -13,6 +13,18 @@ import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import kotlin.random.Random
 
+/**
+ * @brief generates the 'white' noise to be saved to disk and played
+ *
+ * @param type which is either White, Pink or Brown
+ * @param amplitude how loud should the noise be
+ * @param spectrum the frequency
+ * @param sampleRate 44100
+ * @param durationSec how long should it be. You can chose for it to be longer but 1s should
+ * be enough as it loops and otherwise it would be very costly to generate the sound
+ *
+ * @return custom noise as a ByteArray
+ */
 fun generateNoiseSamples(
     type: String,
     amplitude: Float,
@@ -67,6 +79,14 @@ fun writeWav(
     return outputFile.absolutePath
 }
 
+/**
+ * @brief creates the file header so that the file can be saved as .wav
+ *
+ * @param dataLength how long is the file in seconds
+ * @param sampleRate the sample rate which is (44100) usually
+ *
+ * @return the header in bytes
+ */
 fun createWavHeader(
     dataLength: Int,
     sampleRate: Int,
@@ -94,6 +114,17 @@ fun createWavHeader(
         }.array()
 }
 
+/**
+ * @brief updates the custom sound and saves it to disk so that FrequencyGraph can
+ * re-render the new sound wave
+ *
+ * @param context of the current view
+ * @param noiseType White, Pink or Brown
+ * @param amplitude of the wave
+ * @param spectrum of the wave
+ * @param samplesState
+ * @param lineColor how to draw the lines
+ */
 @RequiresApi(Build.VERSION_CODES.O)
 fun updateGraphData(
     context: Context,
@@ -104,7 +135,6 @@ fun updateGraphData(
     lineColor: MutableState<Color>,
 ) {
     if (!AudioPlayer.isPlaying()) return
-    val file = File(context.cacheDir, "generated_noise.wav")
     val sampleRate = 44100
     val durationSec = 1
 
@@ -117,16 +147,6 @@ fun updateGraphData(
             "Brown" -> Brown
             else -> Color.White
         }
-
-    val audioPath = writeWav(samplesState.value, sampleRate, file)
-
-    val sound =
-        Noise(
-            id = "-2",
-            title = "Generated Noise",
-            description = "Noise generated via sliders",
-            audioPath = audioPath,
-        )
 
     val customNoise =
         CustomNoise(

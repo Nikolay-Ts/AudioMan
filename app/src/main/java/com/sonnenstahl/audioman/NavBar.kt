@@ -14,6 +14,13 @@ import com.sonnenstahl.audioman.ui.theme.LightTeal
 import com.sonnenstahl.audioman.ui.theme.Teal
 import com.sonnenstahl.audioman.utils.Router
 
+/**
+ * @brief this is in the bottom of every UI and is used t navigate between the main screen
+ * the library and the custom screen
+ *
+ * @param navController used to change UI views
+ * @param routes the different screens
+ */
 @Composable
 fun NavBar(
     navController: NavController,

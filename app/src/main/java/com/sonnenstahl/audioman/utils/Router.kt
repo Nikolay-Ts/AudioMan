@@ -8,8 +8,12 @@ import androidx.compose.material.icons.outlined.Water
 import androidx.compose.ui.graphics.vector.ImageVector
 
 /**
- * This is used to navigate between different screens.
- * If more screens are needed, they should first be added
+ * @brief This is used to navigate between different screens. If more screens are needed,
+ * they should first be added here. Also useful for structure as you know how many views you have
+ *
+ * @property route of the view
+ * @property label displayed in the scaffold (bottom navigation)
+ * @property icon  displayed int he scaffold (bottom navigation)
  */
 sealed class Router(
     val route: String,

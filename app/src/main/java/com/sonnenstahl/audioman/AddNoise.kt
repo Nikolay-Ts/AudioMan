@@ -26,6 +26,18 @@ import com.sonnenstahl.audioman.utils.*
 import kotlinx.coroutines.launch
 import java.io.File
 
+/**
+ * @brief a pop up view so that the user can add a new sound to the library or modify an
+ * already existing one. When a new sound is added or modified checks for uniqueness in titles
+ * are done. For a Noise ot be added, it must have a unique title and must have a track. Description
+ * and track cover are optional
+ *
+ * @param showDialog a bool to display this pop up
+ * @param soundsList the list of current sounds so the new sound can be added or modify the current
+ * one
+ * @param currentSound to be added. if a new sound is added this variable is null
+ * @param onDismiss what to do if the user taps away from the dialog
+ */
 @Composable
 fun AddNoise(
     showDialog: Boolean,

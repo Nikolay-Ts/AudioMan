@@ -58,6 +58,19 @@ import com.sonnenstahl.audioman.utils.saveSounds
 import kotlinx.coroutines.launch
 import java.io.File
 
+
+/**
+ * @brief displays the custom sounds uploaded by the user. The reason this is its own thing
+ * is to allow for the modification and deletion of custom sounds, as the default ones are
+ * immutable. On long press the user can modify the sound, and on swipe it delets, hinted by
+ * the red background and trashcan
+ *
+ * @param sound the current sound to delete or modify
+ * @param soundsList the custom sounds list by the user
+ * @param openDialogTrigger launches AddNoise with the current Noise to be eddited. True
+ * when an Sound is long pressed
+ * @param context of the current view
+ */
 @androidx.annotation.OptIn(UnstableApi::class)
 @RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterialApi::class, ExperimentalFoundationApi::class)
